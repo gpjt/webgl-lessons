@@ -15,21 +15,17 @@
 
 <script id="shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertex;
-  attribute vec3 aNormal;
 
   uniform mat4 uMVMatrix;
-
-  varying vec3 vNormal;
+  uniform mat4 uPMatrix;
 
   void main(void) {
-    gl_Position = uMVMatrix * vec4(aVertex, 1.0);
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);
   }
 </script>
 
 
 <script type="application/x-javascript">
-  var gl;
-  var shaders = { };
 
   function getShader(gl, id)
   {
@@ -72,8 +68,8 @@
       return shader;
   }
 
-  var mvMatrix;
 
+  var mvMatrix;
 
   function loadIdentity()
   {
@@ -89,11 +85,12 @@
 
   function mvTranslate(v)
   {
-    var m = Matrix.Translation($V([v[0],v[1],v[2]])).ensure4x4();
+    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
 
+  var pMatrix;
 
   function frustum(left, right,
                        bottom, top,
@@ -106,7 +103,7 @@
       var C = -(zfar+znear)/(zfar-znear);
       var D = -2*zfar*znear/(zfar-znear);
 
-      mvMatrix = $M([[X, 0, A, 0],
+      pMatrix = $M([[X, 0, A, 0],
                      [0, Y, B, 0],
                      [0, 0, C, D],
                      [0, 0, -1, 0]]);
@@ -123,6 +120,9 @@
       frustum(xmin, xmax, ymin, ymax, znear, zfar);
   }
 
+
+
+  var gl;
 
   function init()
   {
@@ -147,6 +147,8 @@
     }
 
   }
+
+  var shaders = { };
 
   function WebGLStart()
   {
@@ -177,9 +179,12 @@
 
     var sp = shaders.sp;
 
-    var mvUniform = gl.getUniformLocation(sp, "uMVMatrix");
     function setMatrixUniforms()
     {
+      var pUniform = gl.getUniformLocation(sp, "uPMatrix");
+      gl.uniformMatrix4fv(pUniform, false, new CanvasFloatArray(pMatrix.flatten()));
+
+      var mvUniform = gl.getUniformLocation(sp, "uMVMatrix");
       gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
     }
 
@@ -190,7 +195,8 @@
     {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-      mvMatrix = makePerspective(45, 1.0, 0.1, 100.0)
+      perspective(45, 1.0, 0.1, 100.0);
+      loadIdentity();
       mvTranslate([-1.5, 0.0, -6.0])
 
       var va = gl.getAttribLocation(sp, "aVertex");
