@@ -159,47 +159,43 @@
 
   function drawScene()
   {
+    var va = gl.getAttribLocation(shaderProgram, "aVertex");
+    gl.enableVertexAttribArray(va);
+
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
+
     mvTranslate([-1.5, 0.0, -6.0])
-
-    var va = gl.getAttribLocation(shaderProgram, "aVertex");
-    gl.enableVertexAttribArray(va);
-
-    var buffers = { };
-    buffers.position = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-
+    var triangleBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleBuffer);
     var vertices = [
          0.0,  1.0,  0.0,
         -1.0, -1.0,  0.0,
          1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
     gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
-
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
 
     mvTranslate([3.0, 0.0, 0.0])
-
+    squareBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
     vertices = [
          1.0,  1.0,  0.0,
         -1.0,  1.0,  0.0,
          1.0, -1.0,  0.0,
         -1.0, -1.0,  0.0
     ];
-
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-
+    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
+
 
 
   function webGLStart()
