@@ -123,8 +123,7 @@
 
 
   var gl;
-
-  function init()
+  function initGL()
   {
     var canvas = document.getElementById("lesson01-canvas");
 
@@ -148,18 +147,11 @@
 
   }
 
-  var shaders = { };
 
-  function WebGLStart()
+  var shaderProgram;
+  function initShaders()
   {
-    init();
-
-    gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl.clearDepthf(1.0)
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST);
-
+    var shaders = { };
     if (!("sp" in shaders))
     {
       shaders.fs = getShader(gl, "shader-fs");
@@ -177,67 +169,80 @@
       gl.useProgram(shaders.sp);
     }
 
-    var sp = shaders.sp;
-
-    function setMatrixUniforms()
-    {
-      var pUniform = gl.getUniformLocation(sp, "uPMatrix");
-      gl.uniformMatrix4fv(pUniform, false, new CanvasFloatArray(pMatrix.flatten()));
-
-      var mvUniform = gl.getUniformLocation(sp, "uMVMatrix");
-      gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
-    }
-
-
-
-
-    function draw()
-    {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-      perspective(45, 1.0, 0.1, 100.0);
-      loadIdentity();
-      mvTranslate([-1.5, 0.0, -6.0])
-
-      var va = gl.getAttribLocation(sp, "aVertex");
-      gl.enableVertexAttribArray(va);
-
-      var buffers = { };
-      buffers.position = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-
-      var vertices = [
-           0.0,  1.0,  0.0,
-          -1.0, -1.0,  0.0,
-           1.0, -1.0,  0.0
-      ];
-      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-      gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
-
-      setMatrixUniforms();
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-
-      mvTranslate([3.0, 0.0, 0.0])
-
-      vertices = [
-           1.0,  1.0,  0.0,
-          -1.0,  1.0,  0.0,
-           1.0, -1.0,  0.0,
-          -1.0, -1.0,  0.0
-      ];
-
-      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-
-      setMatrixUniforms();
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-
-    setInterval(draw, 15);
+    shaderProgram = shaders.sp;
   }
+
+
+  function setMatrixUniforms()
+  {
+    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    gl.uniformMatrix4fv(pUniform, false, new CanvasFloatArray(pMatrix.flatten()));
+
+    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
+  }
+
+
+  function drawScene()
+  {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    perspective(45, 1.0, 0.1, 100.0);
+    loadIdentity();
+    mvTranslate([-1.5, 0.0, -6.0])
+
+    var va = gl.getAttribLocation(shaderProgram, "aVertex");
+    gl.enableVertexAttribArray(va);
+
+    var buffers = { };
+    buffers.position = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+
+    var vertices = [
+         0.0,  1.0,  0.0,
+        -1.0, -1.0,  0.0,
+         1.0, -1.0,  0.0
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+    mvTranslate([3.0, 0.0, 0.0])
+
+    vertices = [
+         1.0,  1.0,  0.0,
+        -1.0,  1.0,  0.0,
+         1.0, -1.0,  0.0,
+        -1.0, -1.0,  0.0
+    ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+
+  function webGLStart()
+  {
+    initGL();
+    initShaders()
+
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    gl.clearDepthf(1.0)
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST);
+
+    setInterval(drawScene, 15);
+  }
+
+
 
 </script>
 
@@ -245,7 +250,7 @@
 </head>
 
 
-<body onload="WebGLStart()">
+<body onload="webGLStart()">
   <canvas id="lesson01-canvas" style="border: none;" width="500" height="500"></canvas>
 </body>
 
