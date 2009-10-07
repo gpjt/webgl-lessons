@@ -27,6 +27,32 @@
 
 <script type="application/x-javascript">
 
+  var gl;
+  function initGL()
+  {
+    var canvas = document.getElementById("lesson01-canvas");
+
+    try
+    {
+      gl = canvas.getContext("webkit-3d");
+    }
+    catch(e)
+    {
+    }
+    if (!gl)
+    {
+      try
+      {
+        gl=canvas.getContext("moz-webgl");
+      }
+      catch(e)
+      {
+      }
+    }
+
+  }
+
+
   function getShader(gl, id)
   {
       var shaderScript = document.getElementById(id);
@@ -68,6 +94,30 @@
       return shader;
   }
 
+  var shaderProgram;
+  function initShaders()
+  {
+    var shaders = { };
+    if (!("sp" in shaders))
+    {
+      shaders.fs = getShader(gl, "shader-fs");
+      shaders.vs = getShader(gl, "shader-vs");
+
+      shaders.sp = gl.createProgram();
+      gl.attachShader(shaders.sp, shaders.vs);
+      gl.attachShader(shaders.sp, shaders.fs);
+      gl.linkProgram(shaders.sp);
+
+      if (!gl.getProgrami(shaders.sp, gl.LINK_STATUS)) {
+        alert(gl.getProgramInfoLog(shader));
+      }
+
+      gl.useProgram(shaders.sp);
+    }
+
+    shaderProgram = shaders.sp;
+  }
+
 
   var mvMatrix;
 
@@ -91,85 +141,9 @@
 
 
   var pMatrix;
-
-  function frustum(left, right,
-                       bottom, top,
-                       znear, zfar)
-  {
-      var X = 2*znear/(right-left);
-      var Y = 2*znear/(top-bottom);
-      var A = (right+left)/(right-left);
-      var B = (top+bottom)/(top-bottom);
-      var C = -(zfar+znear)/(zfar-znear);
-      var D = -2*zfar*znear/(zfar-znear);
-
-      pMatrix = $M([[X, 0, A, 0],
-                     [0, Y, B, 0],
-                     [0, 0, C, D],
-                     [0, 0, -1, 0]]);
-  }
-
-
   function perspective(fovy, aspect, znear, zfar)
   {
-      var ymax = znear * Math.tan(fovy * Math.PI / 360.0);
-      var ymin = -ymax;
-      var xmin = ymin * aspect;
-      var xmax = ymax * aspect;
-
-      frustum(xmin, xmax, ymin, ymax, znear, zfar);
-  }
-
-
-
-  var gl;
-  function initGL()
-  {
-    var canvas = document.getElementById("lesson01-canvas");
-
-    try
-    {
-      gl = canvas.getContext("webkit-3d");
-    }
-    catch(e)
-    {
-    }
-    if (!gl)
-    {
-      try
-      {
-        gl=canvas.getContext("moz-webgl");
-      }
-      catch(e)
-      {
-      }
-    }
-
-  }
-
-
-  var shaderProgram;
-  function initShaders()
-  {
-    var shaders = { };
-    if (!("sp" in shaders))
-    {
-      shaders.fs = getShader(gl, "shader-fs");
-      shaders.vs = getShader(gl, "shader-vs");
-
-      shaders.sp = gl.createProgram();
-      gl.attachShader(shaders.sp, shaders.vs);
-      gl.attachShader(shaders.sp, shaders.fs);
-      gl.linkProgram(shaders.sp);
-
-      if (!gl.getProgrami(shaders.sp, gl.LINK_STATUS)) {
-        alert(gl.getProgramInfoLog(shader));
-      }
-
-      gl.useProgram(shaders.sp);
-    }
-
-    shaderProgram = shaders.sp;
+    pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
