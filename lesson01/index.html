@@ -47,6 +47,7 @@
       }
       catch(e)
       {
+      	alert(e);
       }
     }
 
@@ -97,25 +98,20 @@
   var shaderProgram;
   function initShaders()
   {
-    var shaders = { };
-    if (!("sp" in shaders))
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgrami(shaderProgram, gl.LINK_STATUS))
     {
-      shaders.fs = getShader(gl, "shader-fs");
-      shaders.vs = getShader(gl, "shader-vs");
-
-      shaders.sp = gl.createProgram();
-      gl.attachShader(shaders.sp, shaders.vs);
-      gl.attachShader(shaders.sp, shaders.fs);
-      gl.linkProgram(shaders.sp);
-
-      if (!gl.getProgrami(shaders.sp, gl.LINK_STATUS)) {
-        alert(gl.getProgramInfoLog(shader));
-      }
-
-      gl.useProgram(shaders.sp);
+      alert("Could not initialise shaders");
     }
 
-    shaderProgram = shaders.sp;
+    gl.useProgram(shaderProgram);
   }
 
 
@@ -207,7 +203,7 @@
     gl.clearDepthf(1.0)
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST);
+
 
     setInterval(drawScene, 15);
   }
