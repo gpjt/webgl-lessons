@@ -200,8 +200,8 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     mvTranslate([3.0, 0.0, 0.0])
-    squareBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+    squarePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
     vertices = [
          1.0,  1.0,  0.0,
         -1.0,  1.0,  0.0,
@@ -210,6 +210,17 @@
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    var squareColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
+    colors = [];
+    for (vertex in vertices)
+    {
+      colors = colors.concat([0.5, 0.5, 1.0, 1.0])
+    }
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
