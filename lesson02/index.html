@@ -8,19 +8,27 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
+  varying vec4 vColor;
+
+  void main(void)
+  {
+    gl_FragColor = vColor;
+  }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-  attribute vec3 aVertex;
+  attribute vec3 aVertexPosition;
+  attribute vec4 aVertexColor;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
 
-  void main(void) {
-    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);
+  varying vec4 vColor;
+
+  void main(void)
+  {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vColor = aVertexColor;
   }
 </script>
 
@@ -155,8 +163,11 @@
 
   function drawScene()
   {
-    var va = gl.getAttribLocation(shaderProgram, "aVertex");
-    gl.enableVertexAttribArray(va);
+    var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(vertexPositionAttribute);
+
+    var vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    gl.enableVertexAttribArray(vertexColorAttribute);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -164,18 +175,29 @@
     loadIdentity();
 
     mvTranslate([-1.5, 0.0, -6.0])
-    var triangleBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangleBuffer);
+
+    var trianglePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, trianglePositionBuffer);
     var vertices = [
          0.0,  1.0,  0.0,
         -1.0, -1.0,  0.0,
          1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    var triangleColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
+    var colors = [
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-
 
     mvTranslate([3.0, 0.0, 0.0])
     squareBuffer = gl.createBuffer();
@@ -187,7 +209,7 @@
         -1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
