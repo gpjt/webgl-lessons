@@ -1,0 +1,313 @@
+<html>
+
+<head>
+<title>Learning WebGL &mdash; Mandelbrot shader example</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="sylvester.js"></script>
+<script type="text/javascript" src="glUtils.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+  varying vec2 vPosition;
+
+  void main(void)
+  {
+    float cx = vPosition.x;
+    float cy = vPosition.y;
+
+    float hue;
+    float saturation;
+    float value;
+    float hueRound;
+    int hueIndex;
+    float f;
+    float p;
+    float q;
+    float t;
+
+
+    float x = 0;
+    float y = 0;
+    float tempX = 0;
+    int i = 0;
+    int runaway = 0;
+    do
+    {
+      tempX = x * x - y * y + cx;
+      y = 2 * x * y + cy;
+      x = tempX;
+      if (x * x + y * y > 100)
+      {
+        runaway = 1;
+      }
+      i ++;
+    }
+    while (i < 100 && runaway == 0);
+
+    if (runaway == 1)
+    {
+      hue = i / 200.0;
+      saturation = 0.6;
+      value = 1.0;
+
+      hueRound = hue * 6.0;
+      hueIndex = int(hueRound) % 6;
+      f = hueRound - int(hueRound);
+      p = value * (1.0 - saturation);
+      q = value * (1.0 - f * saturation);
+      t = value * (1.0 - (1.0 - f) * saturation);
+
+      if (hueIndex == 0)
+        gl_FragColor = vec4(value, t, p, 1.0);
+      else if (hueIndex == 1)
+        gl_FragColor = vec4(q, value, p, 1.0);
+      else if (hueIndex == 2)
+        gl_FragColor = vec4(p, value, t, 1.0);
+      else if (hueIndex == 3)
+        gl_FragColor = vec4(p, q, value, 1.0);
+      else if (hueIndex == 4)
+        gl_FragColor = vec4(t, p, value, 1.0);
+      else if (hueIndex == 5)
+        gl_FragColor = vec4(value, p, q, 1.0);
+
+    }
+    else
+    {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+  }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec2 aVertexPosition;
+  attribute vec2 aPlotPosition;
+
+  varying vec2 vPosition;
+
+  void main(void)
+  {
+    gl_Position = vec4(aVertexPosition, 1.0, 1.0);
+    vPosition = aPlotPosition;
+  }
+</script>
+
+
+<script type="application/x-javascript">
+
+  var gl;
+  function initGL()
+  {
+    var canvas = document.getElementById("example01-canvas");
+
+    try
+    {
+      gl = canvas.getContext("webkit-3d");
+    }
+    catch(e)
+    {
+    }
+    if (!gl)
+    {
+      try
+      {
+        gl = canvas.getContext("moz-webgl");
+      }
+      catch(e)
+      {
+      }
+    }
+    if (!gl)
+    {
+      alert("Could not initialise WebGL, sorry :-(");
+    }
+  }
+
+
+  function getShader(gl, id)
+  {
+      var shaderScript = document.getElementById(id);
+      if (!shaderScript)
+          return null;
+
+      var str = "";
+      var k = shaderScript.firstChild;
+      while (k)
+      {
+          if (k.nodeType == 3)
+              str += k.textContent;
+          k = k.nextSibling;
+      }
+
+      var shader;
+      if (shaderScript.type == "x-shader/x-fragment")
+      {
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+      }
+      else if (shaderScript.type == "x-shader/x-vertex")
+      {
+          shader = gl.createShader(gl.VERTEX_SHADER);
+      }
+      else
+      {
+          return null;
+      }
+
+      gl.shaderSource(shader, str);
+      gl.compileShader(shader);
+
+      if (!gl.getShaderi(shader, gl.COMPILE_STATUS))
+      {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+      }
+
+      return shader;
+  }
+
+  var shaderProgram;
+  function initShaders()
+  {
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgrami(shaderProgram, gl.LINK_STATUS))
+    {
+      alert("Could not initialise shaders");
+    }
+
+    gl.useProgram(shaderProgram);
+  }
+
+
+  var centerOffsetX = 0;
+  var centerOffsetY = 0;
+
+  var zoom;
+  var zoomCenterX;
+  var zoomCenterY;
+
+  var baseCorners = [
+      [ 0.7,  1.2],
+      [-2.2,  1.2],
+      [ 0.7, -1.2],
+      [-2.2, -1.2],
+  ];
+  function drawScene()
+  {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    var aVertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(aVertexPosition);
+
+    var vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    var vertices = [
+         1.0,  1.0,
+        -1.0,  1.0,
+         1.0, -1.0,
+        -1.0, -1.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+
+
+    var aPlotPosition = gl.getAttribLocation(shaderProgram, "aPlotPosition");
+    gl.enableVertexAttribArray(aPlotPosition);
+
+    var plotPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, plotPositionBuffer);
+    corners = [];
+    for each (corner in baseCorners)
+    {
+      x = corner[0];
+      y = corner[1];
+      corners.push(x / zoom + centerOffsetX);
+      corners.push(y / zoom + centerOffsetY);
+    }
+
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(corners), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(aPlotPosition, 2, gl.FLOAT, false, 0, 0);
+
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    zoom *= 1.02;
+    document.getElementById("zoom").value = zoom;
+    if (centerOffsetX != zoomCenterX)
+    {
+      centerOffsetX += (zoomCenterX - centerOffsetX) / 20;
+    }
+    document.getElementById("centerOffsetX").value = centerOffsetX;
+
+    if (centerOffsetY != zoomCenterY)
+    {
+      centerOffsetY += (zoomCenterY - centerOffsetY) / 20;
+    }
+    document.getElementById("centerOffsetY").value = centerOffsetY;
+
+  }
+
+
+  function resetZoom()
+  {
+    zoom = 1.0;
+    zoomCenterY = parseFloat(document.getElementById("zoomCenterY").value);
+    zoomCenterX = parseFloat(document.getElementById("zoomCenterX").value);
+  }
+
+
+  function webGLStart()
+  {
+    resetZoom();
+
+    initGL();
+    initShaders()
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearDepthf(1.0)
+
+
+    setInterval(drawScene, 40);
+  }
+
+
+
+</script>
+
+
+</head>
+
+
+<body onload="webGLStart()">
+  <canvas id="example01-canvas" style="border: none;" width="425" height="330"></canvas>
+
+  <h2>Inputs</h2>
+  <form name="inputs">
+  <p>
+  Zoom target: <br />
+  X <input type="text" id="zoomCenterX" value="0.28693186889504513" />
+  Y <input type="text" id="zoomCenterY" value="0.014286693904085048" />
+
+  <p>
+  <input type="submit" value="Reset Zoom" onClick="resetZoom()" />
+  </form>
+
+  <h2>Current state (read-only)</h2>
+  <form name="outputs">
+  <p>
+  Current center: <br />
+  X <input type="text" id="centerOffsetX" /> Y <input type="text" id="centerOffsetY" />
+
+  <p>
+  Zoom: <input type="text" id="zoom" />
+  </form>
+
+
+</body>
+
+</html>
