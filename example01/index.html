@@ -237,18 +237,18 @@
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     zoom *= 1.02;
-    document.getElementById("zoom").value = zoom;
+    document.getElementById("zoomOutput").value = zoom;
     if (centerOffsetX != zoomCenterX)
     {
       centerOffsetX += (zoomCenterX - centerOffsetX) / 20;
     }
-    document.getElementById("centerOffsetX").value = centerOffsetX;
+    document.getElementById("centerOffsetXOutput").value = centerOffsetX;
 
     if (centerOffsetY != zoomCenterY)
     {
       centerOffsetY += (zoomCenterY - centerOffsetY) / 20;
     }
-    document.getElementById("centerOffsetY").value = centerOffsetY;
+    document.getElementById("centerOffsetYOutput").value = centerOffsetY;
 
   }
 
@@ -256,8 +256,8 @@
   function resetZoom()
   {
     zoom = 1.0;
-    zoomCenterY = parseFloat(document.getElementById("zoomCenterY").value);
-    zoomCenterX = parseFloat(document.getElementById("zoomCenterX").value);
+    zoomCenterX = parseFloat(document.getElementById("zoomCenterXInput").value);
+    zoomCenterY = parseFloat(document.getElementById("zoomCenterYInput").value);
   }
 
 
@@ -290,21 +290,21 @@
   <form name="inputs">
   <p>
   Zoom target: <br />
-  X <input type="text" id="zoomCenterX" value="0.28693186889504513" />
-  Y <input type="text" id="zoomCenterY" value="0.014286693904085048" />
+  X <input type="text" id="zoomCenterXInput" value="0.28693186889504513" />
+  Y <input type="text" id="zoomCenterYInput" value="0.014286693904085048" />
 
   <p>
-  <input type="submit" value="Reset Zoom" onClick="resetZoom()" />
+  <input type="button" value="Reset Zoom" onClick="resetZoom()" />
   </form>
 
   <h2>Current state (read-only)</h2>
   <form name="outputs">
   <p>
   Current center: <br />
-  X <input type="text" id="centerOffsetX" /> Y <input type="text" id="centerOffsetY" />
+  X <input type="text" id="centerOffsetXOutput" /> Y <input type="text" id="centerOffsetYOutput" />
 
   <p>
-  Zoom: <input type="text" id="zoom" />
+  Zoom: <input type="text" id="zoomOutput" />
   </form>
 
 
