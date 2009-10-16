@@ -43,14 +43,16 @@
     {
       try
       {
-        gl=canvas.getContext("moz-webgl");
+        gl = canvas.getContext("moz-webgl");
       }
       catch(e)
       {
-        alert("Could not initialise WebGL, sorry :-(");
       }
     }
-
+	if (!gl)
+	{
+	  alert("Could not initialise WebGL, sorry :-(");
+	}
   }
 
 
