@@ -51,7 +51,7 @@
       value = 1.0;
 
       hueRound = hue * 6.0;
-      hueIndex = int(hueRound) % 6;
+      hueIndex = int(mod(int(hueRound), 6));
       f = hueRound - int(hueRound);
       p = value * (1.0 - saturation);
       q = value * (1.0 - f * saturation);
