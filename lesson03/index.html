@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>Learning WebGL &mdash; lesson 2</title>
+<title>Learning WebGL &mdash; lesson 3</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="sylvester.js"></script>
@@ -38,7 +38,7 @@
   var gl;
   function initGL()
   {
-    var canvas = document.getElementById("lesson02-canvas");
+    var canvas = document.getElementById("lesson03-canvas");
 
     try
     {
@@ -126,6 +126,23 @@
 
 
   var mvMatrix;
+  var mvMatrixStack = [];
+
+  function mvPushMatrix(m) {
+    if (m) {
+      mvMatrixStack.push(m.dup());
+      mvMatrix = m.dup();
+    } else {
+      mvMatrixStack.push(mvMatrix.dup());
+    }
+  }
+
+  function mvPopMatrix() {
+    if (mvMatrixStack.length == 0)
+      throw "Invalid popMatrix!";
+    mvMatrix = mvMatrixStack.pop();
+    return mvMatrix;
+  }
 
   function loadIdentity()
   {
@@ -138,13 +155,18 @@
     mvMatrix = mvMatrix.x(m);
   }
 
-
   function mvTranslate(v)
   {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
+  function mvRotate(ang, v)
+  {
+    var arad = ang * Math.PI / 180.0;
+    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
+  }
 
   var pMatrix;
   function perspective(fovy, aspect, znear, zfar)
@@ -163,6 +185,9 @@
   }
 
 
+  var rTri = 0;
+  var rSquare = 0;
+  var lastTime = 0;
   function drawScene()
   {
     var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
@@ -177,6 +202,9 @@
     loadIdentity();
 
     mvTranslate([-1.5, 0.0, -7.0])
+
+    mvPushMatrix();
+    mvRotate(rTri, [0, 1, 0]);
 
     var trianglePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, trianglePositionBuffer);
@@ -201,7 +229,14 @@
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+    mvPopMatrix();
+
+
     mvTranslate([3.0, 0.0, 0.0])
+
+    mvPushMatrix();
+    mvRotate(rSquare, [1, 0, 0]);
+
     squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
     vertices = [
@@ -225,6 +260,18 @@
 
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    mvPopMatrix();
+
+    var timeNow = (new Date).getTime();
+    if (lastTime != 0)
+    {
+      var elapsed = timeNow - lastTime;
+
+      rTri += (30 * elapsed) / 1000.0;
+      rSquare += (25 * elapsed) / 1000.0;
+    }
+    lastTime = timeNow;
   }
 
 
@@ -252,7 +299,7 @@
 
 
 <body onload="webGLStart()">
-  <canvas id="lesson02-canvas" style="border: none;" width="500" height="500"></canvas>
+  <canvas id="lesson03-canvas" style="border: none;" width="500" height="500"></canvas>
 </body>
 
 </html>
