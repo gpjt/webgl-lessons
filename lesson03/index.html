@@ -190,6 +190,8 @@
   var lastTime = 0;
   function drawScene()
   {
+    var start = (new Date).getTime();
+
     var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(vertexPositionAttribute);
 
@@ -268,8 +270,8 @@
     {
       var elapsed = timeNow - lastTime;
 
-      rTri += (30 * elapsed) / 1000.0;
-      rSquare += (25 * elapsed) / 1000.0;
+      rTri += (90 * elapsed) / 1000.0;
+      rSquare += (75 * elapsed) / 1000.0;
     }
     lastTime = timeNow;
   }
@@ -287,7 +289,7 @@
     gl.depthFunc(gl.LEQUAL);
 
 
-    setInterval(drawScene, 15);
+    setInterval(drawScene, 40);
   }
 
 
