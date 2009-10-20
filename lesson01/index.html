@@ -49,10 +49,10 @@
       {
       }
     }
-	if (!gl)
-	{
-	  alert("Could not initialise WebGL, sorry :-(");
-	}
+    if (!gl)
+    {
+      alert("Could not initialise WebGL, sorry :-(");
+    }
   }
 
 
@@ -202,7 +202,18 @@
     initShaders()
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clearDepthf(1.0)
+
+    // Support versions of Firefox from before 21 October 2009; clearDepth is the
+    // standard name from now on.
+    if (gl.clearDepthf)
+    {
+      gl.clearDepthf(1.0);
+    }
+    else
+    {
+      gl.clearDepth(1.0);
+    }
+
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
