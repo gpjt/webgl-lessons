@@ -185,8 +185,8 @@
   }
 
 
-  var rTri = 0;
-  var rSquare = 0;
+  var rPyramid = 0;
+  var rCube = 0;
   var lastTime = 0;
   function drawScene()
   {
@@ -201,17 +201,30 @@
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
 
-    mvTranslate([-1.5, 0.0, -7.0])
+    mvTranslate([-1.5, 0.0, -8.0])
 
     mvPushMatrix();
-    mvRotate(rTri, [0, 1, 0]);
+    mvRotate(rPyramid, [0, 1, 0]);
 
     var trianglePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, trianglePositionBuffer);
     var vertices = [
+        // Front face
          0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0
+        -1.0, -1.0,  1.0,
+         1.0, -1.0,  1.0,
+        // Right face
+         0.0,  1.0,  0.0,
+         1.0, -1.0,  1.0,
+         1.0, -1.0, -1.0,
+        // Back face
+         0.0,  1.0,  0.0,
+         1.0, -1.0, -1.0,
+        -1.0, -1.0, -1.0,
+        // Left face
+         0.0,  1.0,  0.0,
+        -1.0, -1.0, -1.0,
+        -1.0, -1.0,  1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
@@ -219,15 +232,28 @@
     var triangleColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
     var colors = [
+        // Front face
         1.0, 0.0, 0.0, 1.0,
         0.0, 1.0, 0.0, 1.0,
         0.0, 0.0, 1.0, 1.0,
+        // Right face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        // Back face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        // Left face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        0.0, 1.0, 0.0, 1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLES, 0, 12);
 
     mvPopMatrix();
 
@@ -235,32 +261,98 @@
     mvTranslate([3.0, 0.0, 0.0])
 
     mvPushMatrix();
-    mvRotate(rSquare, [1, 0, 0]);
+    mvRotate(rCube, [1, 1, 1]);
 
     squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
-    vertices = [
-         1.0,  1.0,  0.0,
-        -1.0,  1.0,  0.0,
-         1.0, -1.0,  0.0,
-        -1.0, -1.0,  0.0
+    squares = [
+      // Top face
+      {
+        vertices : [
+           1.0,  1.0, -1.0,
+          -1.0,  1.0, -1.0,
+           1.0,  1.0,  1.0,
+          -1.0,  1.0,  1.0,
+        ],
+        color : [0, 1, 0, 1]
+      },
+
+      // Front face
+      {
+        vertices : [
+           1.0,  1.0,  1.0,
+          -1.0,  1.0,  1.0,
+           1.0, -1.0,  1.0,
+          -1.0, -1.0,  1.0,
+        ],
+        color : [1, 0, 0, 1]
+      },
+
+      // Left face
+      {
+        vertices : [
+          -1.0,  1.0,  1.0,
+          -1.0,  1.0, -1.0,
+          -1.0, -1.0,  1.0,
+          -1.0, -1.0, -1.0,
+        ],
+        color : [0, 0, 1, 1]
+      },
+
+      // Back face
+      {
+        vertices : [
+           1.0, -1.0, -1.0,
+          -1.0, -1.0, -1.0,
+           1.0,  1.0, -1.0,
+          -1.0,  1.0, -1.0,
+        ],
+        color : [1, 1, 0, 1]
+      },
+
+      // Right face
+      {
+        vertices : [
+           1.0,  1.0, -1.0,
+           1.0,  1.0,  1.0,
+           1.0, -1.0, -1.0,
+           1.0, -1.0,  1.0,
+        ],
+        color : [1, 0, 1, 1]
+      },
+
+      // Bottom face
+      {
+        vertices : [
+           1.0, -1.0,  1.0,
+          -1.0, -1.0,  1.0,
+           1.0, -1.0, -1.0,
+          -1.0, -1.0, -1.0,
+        ],
+        color : [1, 0.5, 0.5, 1]
+      }
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    var squareColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-    colors = [];
-    for (var i=0; i < vertices.length; i++)
+    for (var i in squares)
     {
-      colors = colors.concat([0.5, 0.5, 1.0, 1.0])
+      square = squares[i];
+      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+      var squareColorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
+      colors = [];
+      for (var i=0; i < square.vertices.length; i++)
+      {
+        colors = colors.concat(square.color);
+      }
+
+      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
+      setMatrixUniforms();
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
     mvPopMatrix();
 
     var timeNow = (new Date).getTime();
@@ -268,8 +360,8 @@
     {
       var elapsed = timeNow - lastTime;
 
-      rTri += (90 * elapsed) / 1000.0;
-      rSquare += (75 * elapsed) / 1000.0;
+      rPyramid += (90 * elapsed) / 1000.0;
+      rCube -= (75 * elapsed) / 1000.0;
     }
     lastTime = timeNow;
   }
@@ -298,7 +390,7 @@
     gl.depthFunc(gl.LEQUAL);
 
 
-    setInterval(drawScene, 40);
+    setInterval(drawScene, 15);
   }
 
 
