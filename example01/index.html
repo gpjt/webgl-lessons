@@ -221,11 +221,12 @@
 
     var plotPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, plotPositionBuffer);
+    var cornerIx;
     corners = [];
-    for each (corner in baseCorners)
+    for (cornerIx in baseCorners)
     {
-      x = corner[0];
-      y = corner[1];
+      x = baseCorners[cornerIx][0];
+      y = baseCorners[cornerIx][1];
       corners.push(x / zoom + centerOffsetX);
       corners.push(y / zoom + centerOffsetY);
     }
