@@ -106,6 +106,8 @@
   }
 
   var shaderProgram;
+  var vertexPositionAttribute;
+  var vertexColorAttribute;
   function initShaders()
   {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -122,6 +124,9 @@
     }
 
     gl.useProgram(shaderProgram);
+
+    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
   }
 
 
@@ -165,11 +170,7 @@
 
   function drawScene()
   {
-    var vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(vertexPositionAttribute);
-
-    var vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    gl.enableVertexAttribArray(vertexColorAttribute);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -188,6 +189,7 @@
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
+    gl.enableVertexAttribArray(vertexColorAttribute);
     var triangleColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
     var colors = [

@@ -8,19 +8,21 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    void main(void) {
+    void main(void)
+    {
         gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-  attribute vec3 aVertex;
+  attribute vec3 aVertexPosition;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
 
-  void main(void) {
-    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);
+  void main(void)
+  {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
   }
 </script>
 
@@ -98,6 +100,7 @@
   }
 
   var shaderProgram;
+  var vertexPositionAttribute;
   function initShaders()
   {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -114,6 +117,8 @@
     }
 
     gl.useProgram(shaderProgram);
+
+    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
   }
 
 
@@ -157,10 +162,8 @@
 
   function drawScene()
   {
-    var va = gl.getAttribLocation(shaderProgram, "aVertex");
-    gl.enableVertexAttribArray(va);
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enableVertexAttribArray(vertexPositionAttribute);
 
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
@@ -174,7 +177,7 @@
          1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
@@ -189,7 +192,7 @@
         -1.0, -1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
