@@ -339,16 +339,8 @@
       gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-      var squareColorBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-      colors = [];
-      for (var i=0; i < square.vertices.length; i++)
-      {
-        colors = colors.concat(square.color);
-      }
-
-      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+      gl.disableVertexAttribArray(vertexColorAttribute);
+      gl.vertexAttrib4fv(vertexColorAttribute, square.color);
 
       setMatrixUniforms();
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
