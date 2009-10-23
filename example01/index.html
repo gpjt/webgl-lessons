@@ -26,17 +26,17 @@
     float t;
 
 
-    float x = 0;
-    float y = 0;
-    float tempX = 0;
+    float x = 0.0;
+    float y = 0.0;
+    float tempX = 0.0;
     int i = 0;
     int runaway = 0;
     do
     {
-      tempX = x * x - y * y + cx;
-      y = 2 * x * y + cy;
+      tempX = x * x - y * y + float(cx);
+      y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (x * x + y * y > 100)
+      if (x * x + y * y > 100.0)
       {
         runaway = 1;
       }
@@ -46,13 +46,13 @@
 
     if (runaway == 1)
     {
-      hue = i / 200.0;
+      hue = float(i) / 200.0;
       saturation = 0.6;
       value = 1.0;
 
       hueRound = hue * 6.0;
-      hueIndex = int(mod(int(hueRound), 6));
-      f = hueRound - int(hueRound);
+      hueIndex = int(mod(float(int(hueRound)), 6.0));
+      f = fract(hueRound);
       p = value * (1.0 - saturation);
       q = value * (1.0 - f * saturation);
       t = value * (1.0 - (1.0 - f) * saturation);
