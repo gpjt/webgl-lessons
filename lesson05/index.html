@@ -201,87 +201,50 @@
     mvRotate(zRot, [0, 0, 1]);
 
     gl.enableVertexAttribArray(vertexPositionAttribute);
-    squarePositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
-    squares = [
+    positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    vertexPositions = [
       // Top face
-      {
-        vertices : [
-           1.0,  1.0, -1.0,
-          -1.0,  1.0, -1.0,
-           1.0,  1.0,  1.0,
-          -1.0,  1.0,  1.0,
-        ],
-        color : [0, 1, 0, 1]
-      },
+       1.0,  1.0, -1.0,
+      -1.0,  1.0, -1.0,
+       1.0,  1.0,  1.0,
+      -1.0,  1.0,  1.0,
 
       // Front face
-      {
-        vertices : [
-           1.0,  1.0,  1.0,
-          -1.0,  1.0,  1.0,
-           1.0, -1.0,  1.0,
-          -1.0, -1.0,  1.0,
-        ],
-        color : [1, 0, 0, 1]
-      },
+       1.0,  1.0,  1.0,
+      -1.0,  1.0,  1.0,
+       1.0, -1.0,  1.0,
+      -1.0, -1.0,  1.0,
 
       // Left face
-      {
-        vertices : [
-          -1.0,  1.0,  1.0,
-          -1.0,  1.0, -1.0,
-          -1.0, -1.0,  1.0,
-          -1.0, -1.0, -1.0,
-        ],
-        color : [0, 0, 1, 1]
-      },
+      -1.0,  1.0,  1.0,
+      -1.0,  1.0, -1.0,
+      -1.0, -1.0,  1.0,
+      -1.0, -1.0, -1.0,
 
       // Back face
-      {
-        vertices : [
-           1.0, -1.0, -1.0,
-          -1.0, -1.0, -1.0,
-           1.0,  1.0, -1.0,
-          -1.0,  1.0, -1.0,
-        ],
-        color : [1, 1, 0, 1]
-      },
+       1.0, -1.0, -1.0,
+      -1.0, -1.0, -1.0,
+       1.0,  1.0, -1.0,
+      -1.0,  1.0, -1.0,
 
       // Right face
-      {
-        vertices : [
-           1.0,  1.0, -1.0,
-           1.0,  1.0,  1.0,
-           1.0, -1.0, -1.0,
-           1.0, -1.0,  1.0,
-        ],
-        color : [1, 0, 1, 1]
-      },
+       1.0,  1.0, -1.0,
+       1.0,  1.0,  1.0,
+       1.0, -1.0, -1.0,
+       1.0, -1.0,  1.0,
 
       // Bottom face
-      {
-        vertices : [
-           1.0, -1.0,  1.0,
-          -1.0, -1.0,  1.0,
-           1.0, -1.0, -1.0,
-          -1.0, -1.0, -1.0,
-        ],
-        color : [1, 0.5, 0.5, 1]
-      }
+       1.0, -1.0,  1.0,
+      -1.0, -1.0,  1.0,
+       1.0, -1.0, -1.0,
+      -1.0, -1.0, -1.0,
     ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexPositions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    for (var i in squares)
-    {
-      square = squares[i];
-      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-      setMatrixUniforms();
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 24);
 
     var timeNow = new Date().getTime();
     if (lastTime != 0)
