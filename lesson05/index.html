@@ -190,81 +190,24 @@
   }
 
 
-  var rPyramid = 0;
-  var rCube = 0;
+  var xRot = 0;
+  var yRot = 0;
+  var zRot = 0;
   var lastTime = 0;
   function drawScene()
   {
-    gl.enableVertexAttribArray(vertexPositionAttribute);
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
 
-    mvTranslate([-1.5, 0.0, -8.0])
+    mvTranslate([0.0, 0.0, -5.0])
 
-    mvPushMatrix();
-    mvRotate(rPyramid, [0, 1, 0]);
+    mvRotate(xRot, [1, 0, 0]);
+    mvRotate(yRot, [0, 1, 0]);
+    mvRotate(zRot, [0, 0, 1]);
 
-    var trianglePositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, trianglePositionBuffer);
-    var vertices = [
-        // Front face
-         0.0,  1.0,  0.0,
-        -1.0, -1.0,  1.0,
-         1.0, -1.0,  1.0,
-        // Right face
-         0.0,  1.0,  0.0,
-         1.0, -1.0,  1.0,
-         1.0, -1.0, -1.0,
-        // Back face
-         0.0,  1.0,  0.0,
-         1.0, -1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        // Left face
-         0.0,  1.0,  0.0,
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-    gl.enableVertexAttribArray(vertexColorAttribute);
-    var triangleColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
-    var colors = [
-        // Front face
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        // Right face
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        // Back face
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        // Left face
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        0.0, 1.0, 0.0, 1.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, 12);
-
-    mvPopMatrix();
-
-
-    mvTranslate([3.0, 0.0, 0.0])
-
-    mvPushMatrix();
-    mvRotate(rCube, [1, 1, 1]);
-
+    gl.enableVertexAttribArray(vertexPositionAttribute);
     gl.disableVertexAttribArray(vertexColorAttribute);
     squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
@@ -347,15 +290,17 @@
       setMatrixUniforms();
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
-    mvPopMatrix();
+
+
 
     var timeNow = new Date().getTime();
     if (lastTime != 0)
     {
       var elapsed = timeNow - lastTime;
 
-      rPyramid += (90 * elapsed) / 1000.0;
-      rCube -= (75 * elapsed) / 1000.0;
+      xRot += (90 * elapsed) / 1000.0;
+      yRot += (90 * elapsed) / 1000.0;
+      zRot += (90 * elapsed) / 1000.0;
     }
     lastTime = timeNow;
   }
