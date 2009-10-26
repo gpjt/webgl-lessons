@@ -8,21 +8,28 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
+  varying vec2 vTextureCoord;
+
   void main(void)
   {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4(vTextureCoord.s, vTextureCoord.t, 1.0, 1.0);
   }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
+  attribute vec2 aTextureCoord;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
 
+  varying vec2 vTextureCoord;
+
+
   void main(void)
   {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vTextureCoord = aTextureCoord;
   }
 </script>
 
@@ -101,7 +108,7 @@
 
   var shaderProgram;
   var vertexPositionAttribute;
-  var vertexColorAttribute;
+  var textureCoordAttribute;
   function initShaders()
   {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -120,6 +127,32 @@
     gl.useProgram(shaderProgram);
 
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+  }
+
+
+  function handleLoadedTexture(image, texture)
+  {
+    gl.enable(ctx.TEXTURE_2D);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(ctx.TEXTURE_2D, null);
+  }
+
+
+  var neheTexture;
+  function initTexture()
+  {
+    neheTexture = gl.createTexture();
+    neheTexture.image = new Image();
+    neheTexture.image.onload = function()
+    {
+      handleLoadedTexture(texture.image, texture)
+    }
+
+    neheTexture.image.src = "nehe.gif";
   }
 
 
@@ -205,10 +238,10 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     vertexPositions = [
       // Top face
-       1.0,  1.0, -1.0,
-      -1.0,  1.0, -1.0,
-       1.0,  1.0,  1.0,
-      -1.0,  1.0,  1.0,
+      // 1.0,  1.0, -1.0,
+      //-1.0,  1.0, -1.0,
+      // 1.0,  1.0,  1.0,
+      //-1.0,  1.0,  1.0,
 
       // Front face
        1.0,  1.0,  1.0,
@@ -223,28 +256,71 @@
       -1.0, -1.0, -1.0,
 
       // Back face
-       1.0, -1.0, -1.0,
-      -1.0, -1.0, -1.0,
-       1.0,  1.0, -1.0,
-      -1.0,  1.0, -1.0,
+      //-1.0,  1.0, -1.0,
+      // 1.0,  1.0, -1.0,
+      //-1.0, -1.0, -1.0,
+      // 1.0, -1.0, -1.0,
 
       // Right face
-       1.0,  1.0, -1.0,
-       1.0,  1.0,  1.0,
-       1.0, -1.0, -1.0,
-       1.0, -1.0,  1.0,
+      // 1.0,  1.0, -1.0,
+      // 1.0,  1.0,  1.0,
+      // 1.0, -1.0, -1.0,
+      // 1.0, -1.0,  1.0,
 
       // Bottom face
-       1.0, -1.0,  1.0,
-      -1.0, -1.0,  1.0,
-       1.0, -1.0, -1.0,
-      -1.0, -1.0, -1.0,
+      //-1.0, -1.0, -1.0,
+      // 1.0, -1.0, -1.0,
+      //-1.0, -1.0,  1.0,
+      // 1.0, -1.0,  1.0,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexPositions), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
+    gl.enableVertexAttribArray(textureCoordAttribute);
+    textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+    textureCoords = [
+      // Top face
+      //1.0, 1.0,
+      //0.0, 1.0,
+      //1.0, 0.0,
+      //0.0, 0.0,
+
+      // Front face
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
+
+      // Left face
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
+
+      // Back face
+      //1.0, 1.0,
+      //0.0, 1.0,
+      //1.0, 0.0,
+      //0.0, 0.0,
+
+      // Right face
+      //1.0, 1.0,
+      //0.0, 1.0,
+      //1.0, 0.0,
+      //0.0, 0.0,
+
+      // Bottom face
+      //1.0, 1.0,
+      //0.0, 1.0,
+      //1.0, 0.0,
+      //0.0, 0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 24);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 8);
 
     var timeNow = new Date().getTime();
     if (lastTime != 0)
@@ -263,7 +339,8 @@
   function webGLStart()
   {
     initGL();
-    initShaders()
+    initShaders();
+    initTexture();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
