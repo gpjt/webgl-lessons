@@ -1,0 +1,402 @@
+<html>
+
+<head>
+<title>Learning WebGL &mdash; lesson 5</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="sylvester.js"></script>
+<script type="text/javascript" src="glUtils.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+  varying vec4 vColor;
+
+  void main(void)
+  {
+    gl_FragColor = vColor;
+  }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec4 aVertexColor;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+
+  varying vec4 vColor;
+
+  void main(void)
+  {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vColor = aVertexColor;
+  }
+</script>
+
+
+<script type="application/x-javascript">
+
+  var gl;
+  function initGL()
+  {
+    var canvas = document.getElementById("lesson05-canvas");
+
+    try
+    {
+      gl = canvas.getContext("webkit-3d");
+    }
+    catch(e)
+    {
+    }
+    if (!gl)
+    {
+      try
+      {
+        gl = canvas.getContext("moz-webgl");
+      }
+      catch(e)
+      {
+      }
+    }
+    if (!gl)
+    {
+      alert("Could not initialise WebGL, sorry :-(");
+    }
+  }
+
+
+  function getShader(gl, id)
+  {
+      var shaderScript = document.getElementById(id);
+      if (!shaderScript)
+          return null;
+
+      var str = "";
+      var k = shaderScript.firstChild;
+      while (k)
+      {
+          if (k.nodeType == 3)
+              str += k.textContent;
+          k = k.nextSibling;
+      }
+
+      var shader;
+      if (shaderScript.type == "x-shader/x-fragment")
+      {
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+      }
+      else if (shaderScript.type == "x-shader/x-vertex")
+      {
+          shader = gl.createShader(gl.VERTEX_SHADER);
+      }
+      else
+      {
+          return null;
+      }
+
+      gl.shaderSource(shader, str);
+      gl.compileShader(shader);
+
+      if (!gl.getShaderi(shader, gl.COMPILE_STATUS))
+      {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+      }
+
+      return shader;
+  }
+
+  var shaderProgram;
+  var vertexPositionAttribute;
+  var vertexColorAttribute;
+  function initShaders()
+  {
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgrami(shaderProgram, gl.LINK_STATUS))
+    {
+      alert("Could not initialise shaders");
+    }
+
+    gl.useProgram(shaderProgram);
+
+    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+  }
+
+
+  var mvMatrix;
+  var mvMatrixStack = [];
+
+  function mvPushMatrix(m) {
+    if (m) {
+      mvMatrixStack.push(m.dup());
+      mvMatrix = m.dup();
+    } else {
+      mvMatrixStack.push(mvMatrix.dup());
+    }
+  }
+
+  function mvPopMatrix() {
+    if (mvMatrixStack.length == 0)
+      throw "Invalid popMatrix!";
+    mvMatrix = mvMatrixStack.pop();
+    return mvMatrix;
+  }
+
+  function loadIdentity()
+  {
+    mvMatrix = Matrix.I(4);
+  }
+
+
+  function multMatrix(m)
+  {
+    mvMatrix = mvMatrix.x(m);
+  }
+
+  function mvTranslate(v)
+  {
+    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
+  }
+
+  function mvRotate(ang, v)
+  {
+    var arad = ang * Math.PI / 180.0;
+    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
+  }
+
+  var pMatrix;
+  function perspective(fovy, aspect, znear, zfar)
+  {
+    pMatrix = makePerspective(fovy, aspect, znear, zfar)
+  }
+
+
+  function setMatrixUniforms()
+  {
+    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    gl.uniformMatrix4fv(pUniform, false, new CanvasFloatArray(pMatrix.flatten()));
+
+    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
+  }
+
+
+  var rPyramid = 0;
+  var rCube = 0;
+  var lastTime = 0;
+  function drawScene()
+  {
+    gl.enableVertexAttribArray(vertexPositionAttribute);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    perspective(45, 1.0, 0.1, 100.0);
+    loadIdentity();
+
+    mvTranslate([-1.5, 0.0, -8.0])
+
+    mvPushMatrix();
+    mvRotate(rPyramid, [0, 1, 0]);
+
+    var trianglePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, trianglePositionBuffer);
+    var vertices = [
+        // Front face
+         0.0,  1.0,  0.0,
+        -1.0, -1.0,  1.0,
+         1.0, -1.0,  1.0,
+        // Right face
+         0.0,  1.0,  0.0,
+         1.0, -1.0,  1.0,
+         1.0, -1.0, -1.0,
+        // Back face
+         0.0,  1.0,  0.0,
+         1.0, -1.0, -1.0,
+        -1.0, -1.0, -1.0,
+        // Left face
+         0.0,  1.0,  0.0,
+        -1.0, -1.0, -1.0,
+        -1.0, -1.0,  1.0
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(vertexColorAttribute);
+    var triangleColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
+    var colors = [
+        // Front face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        // Right face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        // Back face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        // Left face
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        0.0, 1.0, 0.0, 1.0
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLES, 0, 12);
+
+    mvPopMatrix();
+
+
+    mvTranslate([3.0, 0.0, 0.0])
+
+    mvPushMatrix();
+    mvRotate(rCube, [1, 1, 1]);
+
+    gl.disableVertexAttribArray(vertexColorAttribute);
+    squarePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
+    squares = [
+      // Top face
+      {
+        vertices : [
+           1.0,  1.0, -1.0,
+          -1.0,  1.0, -1.0,
+           1.0,  1.0,  1.0,
+          -1.0,  1.0,  1.0,
+        ],
+        color : [0, 1, 0, 1]
+      },
+
+      // Front face
+      {
+        vertices : [
+           1.0,  1.0,  1.0,
+          -1.0,  1.0,  1.0,
+           1.0, -1.0,  1.0,
+          -1.0, -1.0,  1.0,
+        ],
+        color : [1, 0, 0, 1]
+      },
+
+      // Left face
+      {
+        vertices : [
+          -1.0,  1.0,  1.0,
+          -1.0,  1.0, -1.0,
+          -1.0, -1.0,  1.0,
+          -1.0, -1.0, -1.0,
+        ],
+        color : [0, 0, 1, 1]
+      },
+
+      // Back face
+      {
+        vertices : [
+           1.0, -1.0, -1.0,
+          -1.0, -1.0, -1.0,
+           1.0,  1.0, -1.0,
+          -1.0,  1.0, -1.0,
+        ],
+        color : [1, 1, 0, 1]
+      },
+
+      // Right face
+      {
+        vertices : [
+           1.0,  1.0, -1.0,
+           1.0,  1.0,  1.0,
+           1.0, -1.0, -1.0,
+           1.0, -1.0,  1.0,
+        ],
+        color : [1, 0, 1, 1]
+      },
+
+      // Bottom face
+      {
+        vertices : [
+           1.0, -1.0,  1.0,
+          -1.0, -1.0,  1.0,
+           1.0, -1.0, -1.0,
+          -1.0, -1.0, -1.0,
+        ],
+        color : [1, 0.5, 0.5, 1]
+      }
+    ];
+
+    for (var i in squares)
+    {
+      square = squares[i];
+      gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+      gl.vertexAttrib4fv(vertexColorAttribute, square.color);
+
+      setMatrixUniforms();
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+    mvPopMatrix();
+
+    var timeNow = new Date().getTime();
+    if (lastTime != 0)
+    {
+      var elapsed = timeNow - lastTime;
+
+      rPyramid += (90 * elapsed) / 1000.0;
+      rCube -= (75 * elapsed) / 1000.0;
+    }
+    lastTime = timeNow;
+  }
+
+
+
+  function webGLStart()
+  {
+    initGL();
+    initShaders()
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    // Support versions of Firefox from before 21 October 2009; clearDepth is the
+    // standard name from now on.
+    if (gl.clearDepthf)
+    {
+      gl.clearDepthf(1.0);
+    }
+    else
+    {
+      gl.clearDepth(1.0);
+    }
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+
+    setInterval(drawScene, 15);
+  }
+
+
+
+</script>
+
+
+</head>
+
+
+<body onload="webGLStart()">
+  <canvas id="lesson05-canvas" style="border: none;" width="500" height="500"></canvas>
+</body>
+
+</html>
