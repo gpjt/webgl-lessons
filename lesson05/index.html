@@ -8,27 +8,21 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-  varying vec4 vColor;
-
   void main(void)
   {
-    gl_FragColor = vColor;
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
   }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
-  attribute vec4 aVertexColor;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
 
-  varying vec4 vColor;
-
   void main(void)
   {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-    vColor = aVertexColor;
   }
 </script>
 
@@ -126,7 +120,6 @@
     gl.useProgram(shaderProgram);
 
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
   }
 
 
@@ -208,7 +201,6 @@
     mvRotate(zRot, [0, 0, 1]);
 
     gl.enableVertexAttribArray(vertexPositionAttribute);
-    gl.disableVertexAttribArray(vertexColorAttribute);
     squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
     squares = [
@@ -284,8 +276,6 @@
       square = squares[i];
       gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-      gl.vertexAttrib4fv(vertexColorAttribute, square.color);
 
       setMatrixUniforms();
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
