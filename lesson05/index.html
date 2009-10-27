@@ -238,40 +238,40 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     vertexPositions = [
       // Top face
-      // 1.0,  1.0, -1.0,
-      //-1.0,  1.0, -1.0,
-      // 1.0,  1.0,  1.0,
-      //-1.0,  1.0,  1.0,
+       1.0,  1.0, -1.0,  // Vertex 0
+      -1.0,  1.0, -1.0,
+       1.0,  1.0,  1.0,
+      -1.0,  1.0,  1.0,
 
       // Front face
-       1.0,  1.0,  1.0,
+       1.0,  1.0,  1.0,  // Vertex 4
       -1.0,  1.0,  1.0,
        1.0, -1.0,  1.0,
       -1.0, -1.0,  1.0,
 
       // Left face
-      -1.0,  1.0,  1.0,
+      -1.0,  1.0,  1.0,  // Vertex 8
       -1.0,  1.0, -1.0,
       -1.0, -1.0,  1.0,
       -1.0, -1.0, -1.0,
 
       // Back face
-      //-1.0,  1.0, -1.0,
-      // 1.0,  1.0, -1.0,
-      //-1.0, -1.0, -1.0,
-      // 1.0, -1.0, -1.0,
+      -1.0,  1.0, -1.0,  // Vertex 12
+       1.0,  1.0, -1.0,
+      -1.0, -1.0, -1.0,
+       1.0, -1.0, -1.0,
 
       // Right face
-      // 1.0,  1.0, -1.0,
-      // 1.0,  1.0,  1.0,
-      // 1.0, -1.0, -1.0,
-      // 1.0, -1.0,  1.0,
+       1.0,  1.0, -1.0,  // Vertex 16
+       1.0,  1.0,  1.0,
+       1.0, -1.0, -1.0,
+       1.0, -1.0,  1.0,
 
       // Bottom face
-      //-1.0, -1.0, -1.0,
-      // 1.0, -1.0, -1.0,
-      //-1.0, -1.0,  1.0,
-      // 1.0, -1.0,  1.0,
+      -1.0, -1.0, -1.0,  // Vertex 20
+       1.0, -1.0, -1.0,
+      -1.0, -1.0,  1.0,
+       1.0, -1.0,  1.0,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexPositions), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
@@ -281,10 +281,10 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
     textureCoords = [
       // Top face
-      //1.0, 1.0,
-      //0.0, 1.0,
-      //1.0, 0.0,
-      //0.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
 
       // Front face
       1.0, 1.0,
@@ -299,28 +299,46 @@
       0.0, 0.0,
 
       // Back face
-      //1.0, 1.0,
-      //0.0, 1.0,
-      //1.0, 0.0,
-      //0.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
 
       // Right face
-      //1.0, 1.0,
-      //0.0, 1.0,
-      //1.0, 0.0,
-      //0.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
 
       // Bottom face
-      //1.0, 1.0,
-      //0.0, 1.0,
-      //1.0, 0.0,
-      //0.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(textureCoords), gl.STATIC_DRAW);
     gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 
+    vertexIndexBuffer = gl.createBuffer();
+    vertexIndices = [
+      // Top face
+      0, 1, 2,      1, 2, 3,
+      // Front face
+      4, 5, 6,      5, 6, 7,
+      // Left face
+      8, 9, 10,     9, 10, 11,
+      // Back face
+      12, 13, 14,   13, 14, 15,
+      // Right face
+      16, 17, 18,   17, 18, 19,
+      // Bottom face
+      20, 21, 22,   22, 23, 24
+    ]
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, textureCoordBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(vertexIndices), gl.STATIC_DRAW);
+
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 8);
+    gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);
 
     var timeNow = new Date().getTime();
     if (lastTime != 0)
