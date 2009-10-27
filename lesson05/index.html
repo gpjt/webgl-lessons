@@ -10,9 +10,11 @@
 <script id="shader-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
 
+  uniform sampler2D uSampler;
+
   void main(void)
   {
-    gl_FragColor = vec4(vTextureCoord.s, vTextureCoord.t, 1.0, 1.0);
+    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
   }
 </script>
 
@@ -128,17 +130,19 @@
 
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+
+    gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
   }
 
 
   function handleLoadedTexture(image, texture)
   {
-    gl.enable(ctx.TEXTURE_2D);
+    gl.enable(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(ctx.TEXTURE_2D, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
 
@@ -336,6 +340,9 @@
     ]
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(vertexIndices), gl.STATIC_DRAW);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, neheTexture);
 
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);
