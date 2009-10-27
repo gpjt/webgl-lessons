@@ -332,9 +332,9 @@
       // Right face
       16, 17, 18,   17, 18, 19,
       // Bottom face
-      20, 21, 22,   22, 23, 24
+      20, 21, 22,   21, 22, 23
     ]
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, textureCoordBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(vertexIndices), gl.STATIC_DRAW);
 
     setMatrixUniforms();
