@@ -342,7 +342,7 @@
       gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(square.vertices), gl.STATIC_DRAW);
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-      gl.vertexAttrib4fv(vertexColorAttribute, square.color);
+      gl.vertexAttrib4fv(vertexColorAttribute, new CanvasFloatArray(square.color));
 
       setMatrixUniforms();
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
