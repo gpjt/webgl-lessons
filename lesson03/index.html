@@ -126,7 +126,10 @@
     gl.useProgram(shaderProgram);
 
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(vertexPositionAttribute);
+
     vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    gl.enableVertexAttribArray(vertexColorAttribute);
   }
 
 
@@ -195,8 +198,6 @@
   var lastTime = 0;
   function drawScene()
   {
-    gl.enableVertexAttribArray(vertexPositionAttribute);
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
@@ -217,7 +218,6 @@
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    gl.enableVertexAttribArray(vertexColorAttribute);
     var triangleColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
     var colors = [
@@ -250,8 +250,15 @@
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    gl.disableVertexAttribArray(vertexColorAttribute);
-    gl.vertexAttrib4f(vertexColorAttribute, 0.5, 0.5, 1.0, 1.0);
+    var squareColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
+    colors = []
+    for (var i in vertices)
+    {
+      colors = colors.concat([0.5, 0.5, 1.0, 1.0]);
+    }
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -293,7 +300,7 @@
     gl.depthFunc(gl.LEQUAL);
 
 
-    setInterval(drawScene, 40);
+    setInterval(drawScene, 15);
   }
 
 
