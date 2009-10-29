@@ -204,7 +204,7 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     mvTranslate([3.0, 0.0, 0.0])
-    squarePositionBuffer = gl.createBuffer();
+    var squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
     vertices = [
          1.0,  1.0,  0.0,
