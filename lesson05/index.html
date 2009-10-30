@@ -148,16 +148,17 @@
 
 
   var neheTexture;
+  var neheImage;
   function initTexture()
   {
     neheTexture = gl.createTexture();
-    neheTexture.image = new Image();
-    neheTexture.image.onload = function()
+    neheImage = new Image();
+    neheImage.onload = function()
     {
-      handleLoadedTexture(neheTexture.image, neheTexture)
+      handleLoadedTexture(neheImage, neheTexture)
     }
 
-    neheTexture.image.src = "nehe.gif";
+    neheImage.src = "nehe.gif";
   }
 
 
