@@ -1,6 +1,6 @@
 A series of simple lessons in WebGL, plus some related examples.
 
-The folders named lesson01, lesson01, and so on are a sequential tutorial
+The folders named lesson01, lesson02, and so on are a sequential tutorial
 and are best understood using the explanatory text at:
 
     <http://learningwebgl.com>
