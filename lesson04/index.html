@@ -195,7 +195,6 @@
 
   var rPyramid = 0;
   var rCube = 0;
-  var lastTime = 0;
   function drawScene()
   {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -345,7 +344,12 @@
     gl.drawElements(gl.TRIANGLES, cubeVertexIndices.length, gl.UNSIGNED_SHORT, 0);
 
     mvPopMatrix();
+  }
 
+
+  var lastTime = 0;
+  function animate()
+  {
     var timeNow = new Date().getTime();
     if (lastTime != 0)
     {
@@ -357,6 +361,12 @@
     lastTime = timeNow;
   }
 
+
+  function tick()
+  {
+    drawScene();
+    animate();
+  }
 
 
   function webGLStart()
@@ -381,7 +391,7 @@
     gl.depthFunc(gl.LEQUAL);
 
 
-    setInterval(drawScene, 15);
+    setInterval(tick, 15);
   }
 
 
