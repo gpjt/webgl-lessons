@@ -3,7 +3,7 @@ A series of simple lessons in WebGL, plus some related examples.
 The folders named lesson01, lesson02, and so on are a sequential tutorial
 and are best understood using the explanatory text at:
 
-    <http://learningwebgl.com>
+    <http://learningwebgl.com/>
 
 The form of the lessons is *very* loosely based on NeHe Productions'
 well-known OpenGL tutorial, which can be found here:
