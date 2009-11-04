@@ -152,28 +152,29 @@
 
     gl.bindTexture(gl.TEXTURE_2D, textures[2]);
     gl.texImage2D(gl.TEXTURE_2D, 0, image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
 
-  var neheTextures = Array();
-  var neheImage;
+  var crateTextures = Array();
+  var crateImage;
   function initTexture()
   {
     for (var i=0; i < 3; i++)
     {
-      neheTextures.push(gl.createTexture());
+      crateTextures.push(gl.createTexture());
     }
-    neheImage = new Image();
-    neheImage.onload = function()
+    crateImage = new Image();
+    crateImage.onload = function()
     {
-      handleLoadedTexture(neheImage, neheTextures)
+      handleLoadedTexture(crateImage, crateTextures)
     }
 
-    neheImage.src = "crate.gif";
+    crateImage.src = "crate.gif";
   }
 
 
@@ -237,8 +238,6 @@
   }
 
 
-  var currentlyPressedKeys = Object();
-
   var xRot = 0;
   var xSpeed = 0;
 
@@ -250,15 +249,11 @@
   var filter = 0;
 
 
+  var currentlyPressedKeys = Object();
+
   function handleKeyDown(event)
   {
     currentlyPressedKeys[event.keyCode] = true;
-  }
-
-
-  function handleKeyUp(event)
-  {
-    currentlyPressedKeys[event.keyCode] = false;
 
     if (String.fromCharCode(event.keyCode) == "F")
     {
@@ -268,6 +263,12 @@
         filter = 0;
       }
     }
+  }
+
+
+  function handleKeyUp(event)
+  {
+    currentlyPressedKeys[event.keyCode] = false;
   }
 
 
@@ -314,7 +315,7 @@
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
 
-    mvTranslate([0.0, 0.0, z])
+    mvTranslate([0.0, 0.0, z]);
 
     mvRotate(xRot, [1, 0, 0]);
     mvRotate(yRot, [0, 1, 0]);
@@ -416,7 +417,7 @@
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(vertexIndices), gl.STATIC_DRAW);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, neheTextures[filter]);
+    gl.bindTexture(gl.TEXTURE_2D, crateTextures[filter]);
     gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
     setMatrixUniforms();
