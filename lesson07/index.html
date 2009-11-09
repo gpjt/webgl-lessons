@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>Learning WebGL &mdash; lesson 6</title>
+<title>Learning WebGL &mdash; lesson 7</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="sylvester.js"></script>
@@ -9,29 +9,48 @@
 
 <script id="shader-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
+  varying float vLightWeighting;
 
   uniform sampler2D uSampler;
 
   void main(void)
   {
-    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+     vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+     gl_FragColor = vec4(textureColor.xyz * vLightWeighting, textureColor.a);
   }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
+  uniform mat4 uNMatrix;
+
+  uniform vec3 uLightingDirection;
+
+  uniform bool uUseLighting;
 
   varying vec2 vTextureCoord;
-
+  varying float vLightWeighting;
 
   void main(void)
   {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
+
+    if (!uUseLighting)
+    {
+      vLightWeighting = 1.0;
+    }
+    else
+    {
+      vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
+      float unitLightWeighting = max(dot(transformedNormal.xyz, uLightingDirection), 0.0);
+      vLightWeighting = unitLightWeighting;
+    }
   }
 </script>
 
@@ -110,6 +129,7 @@
 
   var shaderProgram;
   var vertexPositionAttribute;
+  var vertexNormalAttribute;
   var textureCoordAttribute;
   function initShaders()
   {
@@ -130,6 +150,9 @@
 
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(vertexPositionAttribute);
+
+    vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+    gl.enableVertexAttribArray(vertexNormalAttribute);
 
     textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
     gl.enableVertexAttribArray(textureCoordAttribute);
@@ -222,6 +245,11 @@
 
     var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
+
+    var normalMatrix = mvMatrix.inverse();
+    normalMatrix = normalMatrix.transpose();
+    var nUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    gl.uniformMatrix4fv(nUniform, false, new CanvasFloatArray(normalMatrix.flatten()));
   }
 
 
@@ -233,12 +261,19 @@
 
   var z = -5.0;
 
+  var lighting = false;
+
 
   var currentlyPressedKeys = Object();
 
   function handleKeyDown(event)
   {
     currentlyPressedKeys[event.keyCode] = true;
+
+    if (String.fromCharCode(event.keyCode) == "L")
+    {
+      lighting = !lighting;
+    }
   }
 
 
@@ -338,6 +373,47 @@
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexPositions), gl.STATIC_DRAW);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
+    var normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    var vertexNormals = [
+      // Front face
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+
+      // Back face
+       0.0,  0.0, -1.0,
+       0.0,  0.0, -1.0,
+       0.0,  0.0, -1.0,
+
+      // Top face
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+
+      // Bottom face
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+
+      // Right face
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+
+      // Left face
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexNormals), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+
     var textureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
     var textureCoords = [
@@ -396,9 +472,12 @@
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
     gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uLightingDirection"), 0, 0, 1);
+
+
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);
-
   }
 
 
