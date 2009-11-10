@@ -9,7 +9,7 @@
 
 <script id="shader-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
-  varying float vLightWeighting;
+  varying vec3 vLightWeighting;
 
   uniform sampler2D uSampler;
 
@@ -29,12 +29,15 @@
   uniform mat4 uPMatrix;
   uniform mat4 uNMatrix;
 
+  uniform vec3 uAmbientColor;
+
   uniform vec3 uLightingDirection;
+  uniform vec3 uDirectionalColor;
 
   uniform bool uUseLighting;
 
   varying vec2 vTextureCoord;
-  varying float vLightWeighting;
+  varying vec3 vLightWeighting;
 
   void main(void)
   {
@@ -43,13 +46,13 @@
 
     if (!uUseLighting)
     {
-      vLightWeighting = 1.0;
+      vLightWeighting = vec3(1.0, 1.0, 1.0);
     }
     else
     {
       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
-      float unitLightWeighting = max(dot(transformedNormal.xyz, uLightingDirection), 0.0);
-      vLightWeighting = unitLightWeighting;
+      float directionalLightWeighting = max(dot(transformedNormal.xyz, uLightingDirection), 0.0);
+      vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
     }
   }
 </script>
@@ -477,6 +480,13 @@
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
     if (lighting)
     {
+      var ambientColor = [
+        document.getElementById("ambientR").value,
+        document.getElementById("ambientG").value,
+        document.getElementById("ambientB").value
+      ];
+      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uAmbientColor"), ambientColor);
+
       var lightingDirection = Vector.create([
         document.getElementById("lightDirectionX").value,
         document.getElementById("lightDirectionY").value,
@@ -484,6 +494,14 @@
       ]);
       var adjustedLD = lightingDirection.toUnitVector().x(-1);
       gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uLightingDirection"), adjustedLD.flatten());
+
+      var directionalColor = [
+        document.getElementById("directionalR").value,
+        document.getElementById("directionalG").value,
+        document.getElementById("directionalB").value
+      ];
+      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uDirectionalColor"), directionalColor);
+
     }
 
     setMatrixUniforms();
@@ -580,9 +598,9 @@
 <table style="border: 0; padding: 10px;">
 <tr>
 <td><b>Colour:</b>
-<td>R: <input type="text" id="ambientR" value="1" />
-<td>G: <input type="text" id="ambientG" value="1" />
-<td>B: <input type="text" id="ambientB" value="1" />
+<td>R: <input type="text" id="ambientR" value="0" />
+<td>G: <input type="text" id="ambientG" value="0" />
+<td>B: <input type="text" id="ambientB" value="0" />
 </tr>
 </table>
 
