@@ -473,9 +473,18 @@
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
     gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
+    lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
-    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uLightingDirection"), 0, 0, 1);
-
+    if (lighting)
+    {
+      var lightingDirection = Vector.create([
+        document.getElementById("lightDirectionX").value,
+        document.getElementById("lightDirectionY").value,
+        document.getElementById("lightDirectionZ").value
+      ]);
+      var adjustedLD = lightingDirection.toUnitVector().x(-1);
+      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uLightingDirection"), adjustedLD.flatten());
+    }
 
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);
@@ -544,6 +553,39 @@
 
 <body onload="webGLStart()">
   <canvas id="lesson07-canvas" style="border: none;" width="500" height="500"></canvas>
+
+<br />
+<input type="checkbox" id="lighting" /> Use lighting<br/>
+(Use cursor keys to spin the box)
+
+<br/>
+<h2>Directional light:</h2>
+
+<table style="border: 0; padding: 10px;">
+<tr>
+<td><b>Direction:</b>
+<td>X: <input type="text" id="lightDirectionX" value="-0.25" />
+<td>Y: <input type="text" id="lightDirectionY" value="-0.25" />
+<td>Z: <input type="text" id="lightDirectionZ" value="-1.0" />
+</tr>
+<tr>
+<td><b>Colour:</b>
+<td>R: <input type="text" id="directionalR" value="1" />
+<td>G: <input type="text" id="directionalG" value="1" />
+<td>B: <input type="text" id="directionalB" value="1" />
+</tr>
+</table>
+
+<h2>Ambient light:</h2>
+<table style="border: 0; padding: 10px;">
+<tr>
+<td><b>Colour:</b>
+<td>R: <input type="text" id="ambientR" value="1" />
+<td>G: <input type="text" id="ambientG" value="1" />
+<td>B: <input type="text" id="ambientB" value="1" />
+</tr>
+</table>
+
 </body>
 
 </html>
