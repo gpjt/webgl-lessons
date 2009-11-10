@@ -264,19 +264,12 @@
 
   var z = -5.0;
 
-  var lighting = false;
-
 
   var currentlyPressedKeys = Object();
 
   function handleKeyDown(event)
   {
     currentlyPressedKeys[event.keyCode] = true;
-
-    if (String.fromCharCode(event.keyCode) == "L")
-    {
-      lighting = !lighting;
-    }
   }
 
 
@@ -570,11 +563,13 @@
 
 
 <body onload="webGLStart()">
+<a href="http://learningwebgl.com/blog/?p=684">&lt;&lt; Back to Lesson 7</a><br />
+
   <canvas id="lesson07-canvas" style="border: none;" width="500" height="500"></canvas>
 
 <br />
 <input type="checkbox" id="lighting" /> Use lighting<br/>
-(Use cursor keys to spin the box)
+(Use cursor keys to spin the box and <code>Page Up</code>/<code>Page Down</code> to zoom out/in)
 
 <br/>
 <h2>Directional light:</h2>
@@ -588,9 +583,9 @@
 </tr>
 <tr>
 <td><b>Colour:</b>
-<td>R: <input type="text" id="directionalR" value="1" />
-<td>G: <input type="text" id="directionalG" value="1" />
-<td>B: <input type="text" id="directionalB" value="1" />
+<td>R: <input type="text" id="directionalR" value="0.8" />
+<td>G: <input type="text" id="directionalG" value="0.8" />
+<td>B: <input type="text" id="directionalB" value="0.8" />
 </tr>
 </table>
 
@@ -598,12 +593,13 @@
 <table style="border: 0; padding: 10px;">
 <tr>
 <td><b>Colour:</b>
-<td>R: <input type="text" id="ambientR" value="0" />
-<td>G: <input type="text" id="ambientG" value="0" />
-<td>B: <input type="text" id="ambientB" value="0" />
+<td>R: <input type="text" id="ambientR" value="0.2" />
+<td>G: <input type="text" id="ambientG" value="0.2" />
+<td>B: <input type="text" id="ambientB" value="0.2" />
 </tr>
 </table>
 
+<a href="http://learningwebgl.com/blog/?p=684">&lt;&lt; Back to Lesson 7</a>
 </body>
 
 </html>
