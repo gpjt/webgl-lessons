@@ -165,6 +165,7 @@
   }
 
   var shaderProgram;
+  var aVertexPosition;
   function initShaders()
   {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -181,6 +182,12 @@
     }
 
     gl.useProgram(shaderProgram);
+
+    aVertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(aVertexPosition);
+
+    aPlotPosition = gl.getAttribLocation(shaderProgram, "aPlotPosition");
+    gl.enableVertexAttribArray(aPlotPosition);
   }
 
 
@@ -190,6 +197,24 @@
   var zoom;
   var zoomCenterX;
   var zoomCenterY;
+
+  var vertexPositionBuffer;
+  function initBuffers()
+  {
+    vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    var vertices = [
+         1.0,  1.0,
+        -1.0,  1.0,
+         1.0, -1.0,
+        -1.0, -1.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+    vertexPositionBuffer.itemSize = 2;
+    vertexPositionBuffer.numItems = 4;
+  }
+
+
 
   var baseCorners = [
       [ 0.7,  1.2],
@@ -201,23 +226,9 @@
   {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    var aVertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(aVertexPosition);
-
-    var vertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    var vertices = [
-         1.0,  1.0,
-        -1.0,  1.0,
-         1.0, -1.0,
-        -1.0, -1.0,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(aVertexPosition, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-
-    var aPlotPosition = gl.getAttribLocation(shaderProgram, "aPlotPosition");
-    gl.enableVertexAttribArray(aPlotPosition);
 
     var plotPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, plotPositionBuffer);
@@ -234,8 +245,9 @@
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(corners), gl.STATIC_DRAW);
     gl.vertexAttribPointer(aPlotPosition, 2, gl.FLOAT, false, 0, 0);
 
-
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    gl.deleteBuffer(plotPositionBuffer)
 
     zoom *= 1.02;
     document.getElementById("zoomOutput").value = zoom;
@@ -273,8 +285,9 @@
 
     gl.clearDepth(1.0);
 
+    initBuffers();
 
-    setInterval(drawScene, 40);
+    setInterval(drawScene, 15);
   }
 
 
