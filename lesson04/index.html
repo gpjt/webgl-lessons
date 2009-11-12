@@ -193,22 +193,15 @@
   }
 
 
-  var rPyramid = 0;
-  var rCube = 0;
-  function drawScene()
+  var pyramidVertexPositionBuffer;
+  var pyramidVertexColorBuffer;
+  var cubeVertexPositionBuffer;
+  var cubeVertexColorBuffer;
+  var cubeVertexIndexBuffer;
+  function initBuffers()
   {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-    perspective(45, 1.0, 0.1, 100.0);
-    loadIdentity();
-
-    mvTranslate([-1.5, 0.0, -8.0])
-
-    mvPushMatrix();
-    mvRotate(rPyramid, [0, 1, 0]);
-
-    var pyramidPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidPositionBuffer);
+    pyramidVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
     var vertices = [
         // Front face
          0.0,  1.0,  0.0,
@@ -228,10 +221,9 @@
         -1.0, -1.0,  1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    var pyramidColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidColorBuffer);
+    pyramidVertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
     var colors = [
         // Front face
         1.0, 0.0, 0.0, 1.0,
@@ -251,22 +243,11 @@
         0.0, 1.0, 0.0, 1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(colors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, 12);
-
-    mvPopMatrix();
 
 
-    mvTranslate([3.0, 0.0, 0.0])
-
-    mvPushMatrix();
-    mvRotate(rCube, [1, 1, 1]);
-
-    var cubePositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubePositionBuffer);
-    var cubeVertexPositions = [
+    cubeVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+    vertices = [
       // Front face
       -1.0, -1.0,  1.0,
        1.0, -1.0,  1.0,
@@ -303,11 +284,10 @@
       -1.0,  1.0,  1.0,
       -1.0,  1.0, -1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(cubeVertexPositions), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
 
-    var cubeColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeColorBuffer);
+    cubeVertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
     var colors = [
       [1.0, 0.0, 0.0, 1.0],     // Front face
       [1.0, 1.0, 0.0, 1.0],     // Back face
@@ -326,9 +306,8 @@
       }
     }
     gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(unpackedColors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
-    var cubeVertexIndexBuffer = gl.createBuffer();
+    cubeVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     var cubeVertexIndices = [
       0, 1, 2,      0, 2, 3,    // Front face
@@ -340,10 +319,52 @@
     ]
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(cubeVertexIndices), gl.STATIC_DRAW);
 
+  }
+
+
+  var rPyramid = 0;
+  var rCube = 0;
+  function drawScene()
+  {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    perspective(45, 1.0, 0.1, 100.0);
+    loadIdentity();
+
+    mvTranslate([-1.5, 0.0, -8.0])
+
+    mvPushMatrix();
+    mvRotate(rPyramid, [0, 1, 0]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, cubeVertexIndices.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 12);
 
     mvPopMatrix();
+
+
+    mvTranslate([3.0, 0.0, 0.0])
+
+    mvPushMatrix();
+    mvRotate(rCube, [1, 1, 1]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+
+    mvPopMatrix();
+
   }
 
 
@@ -390,6 +411,7 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
+    initBuffers();
 
     setInterval(tick, 15);
   }
