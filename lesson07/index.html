@@ -16,7 +16,7 @@
   void main(void)
   {
      vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
-     gl_FragColor = vec4(textureColor.xyz * vLightWeighting, textureColor.a);
+     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
 </script>
 
