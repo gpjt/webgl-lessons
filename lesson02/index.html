@@ -242,7 +242,7 @@
     gl.vertexAttribPointer(vertexColorAttribute, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.itemSize);
+    gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
 
     mvTranslate([3.0, 0.0, 0.0])
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
