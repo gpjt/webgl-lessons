@@ -60,6 +60,34 @@
 
 <script type="application/x-javascript">
 
+  // This code is for Firefox/Minefield compatibility.  WebGL
+  // originally used a class called CanvasFloatArray, but the
+  // specication has now changed, and it's called WebGLFloatArray.
+  // Firefox/Minefield still (as of 13 Nov 2009) uses the old
+  // name, but WebKit/Safari uses the new one.  I've moved the
+  // lessons over to the new name, but this code will stay here
+  // for the time being to make sure that Firefox users (like
+  // me!) can run the demos.
+  //
+  try
+  {
+    WebGLFloatArray;
+  }
+  catch (e)
+  {
+    try
+    {
+      WebGLFloatArray = CanvasFloatArray;
+      WebGLUnsignedShortArray = CanvasUnsignedShortArray;
+    }
+    catch (e)
+    {
+      alert("Could not find any WebGL array types.");
+    }
+  }
+  // End of compatibility code
+
+
   var gl;
   function initGL()
   {
@@ -244,15 +272,15 @@
   function setMatrixUniforms()
   {
     var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    gl.uniformMatrix4fv(pUniform, false, new CanvasFloatArray(pMatrix.flatten()));
+    gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
     var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(mvUniform, false, new CanvasFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
 
     var normalMatrix = mvMatrix.inverse();
     normalMatrix = normalMatrix.transpose();
     var nUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-    gl.uniformMatrix4fv(nUniform, false, new CanvasFloatArray(normalMatrix.flatten()));
+    gl.uniformMatrix4fv(nUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
   }
 
 
@@ -359,7 +387,7 @@
       -1.0,  1.0,  1.0,
       -1.0,  1.0, -1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
     cubeVertexPositionBuffer.itemSize = 3;
     cubeVertexPositionBuffer.numItems = 24;
 
@@ -402,7 +430,7 @@
       -1.0,  0.0,  0.0,
       -1.0,  0.0,  0.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(vertexNormals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
     cubeVertexNormalBuffer.itemSize = 3;
     cubeVertexNormalBuffer.numItems = 24;
 
@@ -445,7 +473,7 @@
       1.0, 1.0,
       0.0, 1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new CanvasFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
     cubeVertexTextureCoordBuffer.itemSize = 2;
     cubeVertexTextureCoordBuffer.numItems = 24;
 
@@ -459,7 +487,7 @@
       16, 17, 18,   16, 18, 19, // Right face
       20, 21, 22,   20, 22, 23  // Left face
     ]
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new CanvasUnsignedShortArray(cubeVertexIndices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(cubeVertexIndices), gl.STATIC_DRAW);
     cubeVertexIndexBuffer.itemSize = 1;
     cubeVertexIndexBuffer.numItems = 36;
   }
