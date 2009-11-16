@@ -14,5 +14,3 @@ well-known OpenGL tutorial, which can be found here:
 The folders named example01 etc are example code for interesting
 stuff outside the scope of the tutorial, and have their own README.txt
 files with details.
-
-
