@@ -538,12 +538,12 @@
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
     if (lighting)
     {
-      var ambientColor = [
+      gl.uniform3f(
+        gl.getUniformLocation(shaderProgram, "uAmbientColor"),
         parseFloat(document.getElementById("ambientR").value),
         parseFloat(document.getElementById("ambientG").value),
         parseFloat(document.getElementById("ambientB").value)
-      ];
-      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uAmbientColor"), new WebGLFloatArray(ambientColor));
+      );
 
       var lightingDirection = Vector.create([
         parseFloat(document.getElementById("lightDirectionX").value),
@@ -551,15 +551,18 @@
         parseFloat(document.getElementById("lightDirectionZ").value)
       ]);
       var adjustedLD = lightingDirection.toUnitVector().x(-1);
-      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uLightingDirection"), new WebGLFloatArray(adjustedLD.flatten()));
+      var flatLD = adjustedLD.flatten();
+      gl.uniform3f(
+        gl.getUniformLocation(shaderProgram, "uLightingDirection"),
+        flatLD[0], flatLD[1], flatLD[2]
+      );
 
-      var directionalColor = [
+      gl.uniform3f(
+        gl.getUniformLocation(shaderProgram, "uDirectionalColor"),
         parseFloat(document.getElementById("directionalR").value),
         parseFloat(document.getElementById("directionalG").value),
         parseFloat(document.getElementById("directionalB").value)
-      ];
-      gl.uniform3fv(gl.getUniformLocation(shaderProgram, "uDirectionalColor"), new WebGLFloatArray(directionalColor));
-
+      );
     }
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
