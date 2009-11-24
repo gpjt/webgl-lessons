@@ -380,11 +380,12 @@
 
     this.animate = function(elapsedTime)
       {
-        this.angle += (this.rotationSpeed * 60000) / elapsedTime;
+        var effectiveFPMS = 60 / 1000;
+        this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
 
         // Decrease the distance, resetting the star to the outside of
         // the spiral if it's at the center.
-        this.dist -= 0.01;
+        this.dist -= 0.01 * effectiveFPMS * elapsedTime;
         if (this.dist < 0.0)
         {
           this.dist += 5.0;
