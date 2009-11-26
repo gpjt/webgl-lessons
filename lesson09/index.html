@@ -374,13 +374,11 @@
           drawStar();
         }
 
-
         // All stars spin around the Z axis at the same rate
         mvRotate(spin, [0.0, 0.0, 1.0]);
-        // Set the star's color
-        gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
 
-        // Draw the star
+        // Draw the star in its main color
+        gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
         drawStar()
 
         mvPopMatrix();
