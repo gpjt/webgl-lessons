@@ -281,12 +281,12 @@
     if (currentlyPressedKeys[33])
     {
       // Page Up
-      zoom += 0.5;
+      zoom += 0.1;
     }
     if (currentlyPressedKeys[34])
     {
       // Page Down
-      z -= 0.5;
+      zoom -= 0.1;
     }
     if (currentlyPressedKeys[38])
     {
@@ -338,13 +338,8 @@
     this.dist = startingDistance;
     this.rotationSpeed = rotationSpeed;
 
-    // Give the star a random color
-    this.r = Math.random();
-    this.g = Math.random();
-    this.b = Math.random();
 
-
-    this.draw = function(tilt, spin)
+    this.draw = function(tilt, spin, twinkle)
       {
         mvPushMatrix();
 
@@ -389,12 +384,31 @@
         if (this.dist < 0.0)
         {
           this.dist += 5.0;
-          this.r = Math.random();
-          this.g = Math.random();
-          this.b = Math.random();
+          this.randomiseColors();
         }
 
       };
+
+
+    this.randomiseColors = function()
+      {
+        // Give the star a random color for normal
+        // circumstances...
+        this.r = Math.random();
+        this.g = Math.random();
+        this.b = Math.random();
+
+        // When the star is twinkling, we draw it twice, once
+        // in the color below (not spinning) and then once in the
+        // main color defined above.
+        this.twinkleR = Math.random();
+        this.twinkleG = Math.random();
+        this.twinkleB = Math.random();
+      };
+
+    // Set the colors to a starting value.
+    this.randomiseColors();
+
   }
 
 
@@ -426,7 +440,7 @@
 
     for (var i in stars)
     {
-      stars[i].draw(tilt, spin);
+      stars[i].draw(tilt, spin, document.getElementById("twinkle").checked);
       spin += 0.1;
     }
 
@@ -472,9 +486,6 @@
 
     gl.clearDepth(1.0);
 
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
@@ -495,6 +506,8 @@
   <canvas id="lesson09-canvas" style="border: none;" width="500" height="500"></canvas>
 
   <br/>
+<input type="checkbox" id="twinkle" checked /> Twinkle<br/>
+(Use up/down cursor keys to rotate, and <code>Page Up</code>/<code>Page Down</code> to zoom out/in)
 
 <a href="http://learningwebgl.com/blog/?p=1008">&lt;&lt; Back to Lesson 9</a>
 </body>
