@@ -449,9 +449,10 @@
     mvTranslate([0.0, 0.0, zoom]);
     mvRotate(tilt, [1.0, 0.0, 0.0]);
 
+    var twinkle = document.getElementById("twinkle").checked;
     for (var i in stars)
     {
-      stars[i].draw(tilt, spin, document.getElementById("twinkle").checked);
+      stars[i].draw(tilt, spin, twinkle);
       spin += 0.1;
     }
 
