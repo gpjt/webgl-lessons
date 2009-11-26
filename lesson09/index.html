@@ -331,13 +331,29 @@
   }
 
 
+  function drawStar()
+  {
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, starTexture);
+    gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, starVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(textureCoordAttribute, starVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, starVertexPositionBuffer);
+    gl.vertexAttribPointer(vertexPositionAttribute, starVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, starVertexPositionBuffer.numItems);
+  }
+
+
 
   function Star(startingDistance, rotationSpeed)
   {
     this.angle = 0;
     this.dist = startingDistance;
     this.rotationSpeed = rotationSpeed;
-
 
     this.draw = function(tilt, spin, twinkle)
       {
@@ -351,24 +367,21 @@
         mvRotate(-this.angle, [0.0, 1.0, 0.0]);
         mvRotate(-tilt, [1.0, 0.0, 0.0]);
 
+        if (twinkle)
+        {
+          // Draw a non-rotating star in the alternate "twinkling" color
+          gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.twinkleR, this.twinkleG, this.twinkleB);
+          drawStar();
+        }
+
+
         // All stars spin around the Z axis at the same rate
         mvRotate(spin, [0.0, 0.0, 1.0]);
         // Set the star's color
         gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
 
         // Draw the star
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, starTexture);
-        gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, starVertexTextureCoordBuffer);
-        gl.vertexAttribPointer(textureCoordAttribute, starVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, starVertexPositionBuffer);
-        gl.vertexAttribPointer(vertexPositionAttribute, starVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, starVertexPositionBuffer.numItems);
+        drawStar()
 
         mvPopMatrix();
       };
@@ -506,7 +519,7 @@
   <canvas id="lesson09-canvas" style="border: none;" width="500" height="500"></canvas>
 
   <br/>
-<input type="checkbox" id="twinkle" checked /> Twinkle<br/>
+<input type="checkbox" id="twinkle" /> Twinkle<br/>
 (Use up/down cursor keys to rotate, and <code>Page Up</code>/<code>Page Down</code> to zoom out/in)
 
 <a href="http://learningwebgl.com/blog/?p=1008">&lt;&lt; Back to Lesson 9</a>
