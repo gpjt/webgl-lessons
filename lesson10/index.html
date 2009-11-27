@@ -1,0 +1,487 @@
+<html>
+
+<head>
+<title>Learning WebGL &mdash; lesson 10</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="sylvester.js"></script>
+<script type="text/javascript" src="glUtils.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+  varying vec2 vTextureCoord;
+
+  uniform sampler2D uSampler;
+
+  uniform vec3 uColor;
+
+  void main(void)
+  {
+    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+    gl_FragColor = textureColor * vec4(uColor, 1.0);
+  }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec2 aTextureCoord;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+
+  varying vec2 vTextureCoord;
+
+  void main(void)
+  {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vTextureCoord = aTextureCoord;
+  }
+</script>
+
+
+<script type="application/x-javascript">
+
+  // This code is for Firefox/Minefield compatibility.  WebGL
+  // originally used a class called CanvasFloatArray, but the
+  // specication has now changed, and it's called WebGLFloatArray.
+  // Firefox/Minefield still (as of 13 Nov 2009) uses the old
+  // name, but WebKit/Safari uses the new one.  I've moved the
+  // lessons over to the new name, but this code will stay here
+  // for the time being to make sure that Firefox users (like
+  // me!) can run the demos.
+  //
+  try
+  {
+    WebGLFloatArray;
+  }
+  catch (e)
+  {
+    try
+    {
+      WebGLFloatArray = CanvasFloatArray;
+      WebGLUnsignedShortArray = CanvasUnsignedShortArray;
+    }
+    catch (e)
+    {
+      alert("Could not find any WebGL array types.");
+    }
+  }
+  // End of compatibility code
+
+
+  var gl;
+  function initGL()
+  {
+    var canvas = document.getElementById("lesson10-canvas");
+
+    try
+    {
+      gl = canvas.getContext("webkit-3d");
+    }
+    catch(e)
+    {
+    }
+    if (!gl)
+    {
+      try
+      {
+        gl = canvas.getContext("moz-webgl");
+      }
+      catch(e)
+      {
+      }
+    }
+    if (!gl)
+    {
+      alert("Could not initialise WebGL, sorry :-(");
+    }
+  }
+
+
+  function getShader(gl, id)
+  {
+      var shaderScript = document.getElementById(id);
+      if (!shaderScript)
+          return null;
+
+      var str = "";
+      var k = shaderScript.firstChild;
+      while (k)
+      {
+          if (k.nodeType == 3)
+              str += k.textContent;
+          k = k.nextSibling;
+      }
+
+      var shader;
+      if (shaderScript.type == "x-shader/x-fragment")
+      {
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+      }
+      else if (shaderScript.type == "x-shader/x-vertex")
+      {
+          shader = gl.createShader(gl.VERTEX_SHADER);
+      }
+      else
+      {
+          return null;
+      }
+
+      gl.shaderSource(shader, str);
+      gl.compileShader(shader);
+
+      if (!gl.getShaderi(shader, gl.COMPILE_STATUS))
+      {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+      }
+
+      return shader;
+  }
+
+  var shaderProgram;
+  var vertexPositionAttribute;
+  var textureCoordAttribute;
+  function initShaders()
+  {
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgrami(shaderProgram, gl.LINK_STATUS))
+    {
+      alert("Could not initialise shaders");
+    }
+
+    gl.useProgram(shaderProgram);
+
+    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(vertexPositionAttribute);
+
+    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(textureCoordAttribute);
+  }
+
+
+  function handleLoadedTexture(image, texture)
+  {
+    gl.enable(gl.TEXTURE_2D);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  }
+
+
+  var mudTexture;
+  var mudImage;
+  function initTexture()
+  {
+    mudTexture = gl.createTexture();
+    mudImage = new Image();
+    mudImage.onload = function()
+    {
+      handleLoadedTexture(mudImage, mudTexture)
+    }
+
+    mudImage.src = "mud.gif";
+  }
+
+
+  var mvMatrix;
+  var mvMatrixStack = [];
+
+  function mvPushMatrix(m) {
+    if (m) {
+      mvMatrixStack.push(m.dup());
+      mvMatrix = m.dup();
+    } else {
+      mvMatrixStack.push(mvMatrix.dup());
+    }
+  }
+
+  function mvPopMatrix() {
+    if (mvMatrixStack.length == 0)
+      throw "Invalid popMatrix!";
+    mvMatrix = mvMatrixStack.pop();
+    return mvMatrix;
+  }
+
+  function loadIdentity()
+  {
+    mvMatrix = Matrix.I(4);
+  }
+
+
+  function multMatrix(m)
+  {
+    mvMatrix = mvMatrix.x(m);
+  }
+
+  function mvTranslate(v)
+  {
+    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
+  }
+
+  function mvRotate(ang, v)
+  {
+    var arad = ang * Math.PI / 180.0;
+    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
+  }
+
+  var pMatrix;
+  function perspective(fovy, aspect, znear, zfar)
+  {
+    pMatrix = makePerspective(fovy, aspect, znear, zfar)
+  }
+
+
+  function setMatrixUniforms()
+  {
+    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
+
+    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+  }
+
+
+
+  var currentlyPressedKeys = Object();
+
+  function handleKeyDown(event)
+  {
+    currentlyPressedKeys[event.keyCode] = true;
+  }
+
+
+  function handleKeyUp(event)
+  {
+    currentlyPressedKeys[event.keyCode] = false;
+  }
+
+
+  var lookUpDown = 0;
+
+  var yRot = 0;
+
+  var xPos = 0;
+  var zPos = 0;
+
+  var piOver180 = Math.PI / 180;
+
+  // Used to make us "jog" up and down as we move forward.
+  var walkBiasAngle = 0;
+  var walkBias = 0;
+
+
+  function handleKeys()
+  {
+    if (currentlyPressedKeys[33])
+    {
+      // Page Up
+      lookUpDown += 1.5;
+    }
+    if (currentlyPressedKeys[34])
+    {
+      // Page Down
+      lookUpDown -= 1.5;
+    }
+    if (currentlyPressedKeys[37])
+    {
+      // Left cursor key
+      yRot += 1.5;
+    }
+    if (currentlyPressedKeys[39])
+    {
+      // Right cursor key
+      yRot -= 1.5;
+    }
+    if (currentlyPressedKeys[38])
+    {
+      // Up cursor key
+      xPos -= Math.sin(yRot * piOver180 ) * 0.05;
+      zPos -= Math.cos(yRot * piOver180 ) * 0.05;
+
+      if (walkBiasAngle >= 359.0)
+      {
+          walkBiasAngle = 0.0;
+      }
+      else
+      {
+          walkBiasAngle += 10;
+      }
+      walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
+    }
+    if (currentlyPressedKeys[40])
+    {
+      // Down cursor key
+      xPos += Math.sin(yRot * piOver180 ) * 0.05;
+      zPos += Math.cos(yRot * piOver180 ) * 0.05;
+
+      if (walkBiasAngle <= 1.0)
+      {
+          walkBiasAngle = 0.0;
+      }
+      else
+      {
+          walkBiasAngle -= 10;
+      }
+      walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
+    }
+  }
+
+
+  var worldVertexPositionBuffer;
+  var worldVertexTextureCoordBuffer;
+  function handleLoadedWorld(data)
+  {
+    var lines = data.split("\n");
+    var vertexCount = 0;
+    var vertexPositions = [];
+    var vertexTextureCoords = [];
+    for (var i in lines)
+    {
+      var initialVals = lines[i].split(" ");
+      // If there are two consecutive spaces in a line, JavaScript's
+      // split function will return an empty string as a token.  Let's
+      // get rid of them before processing the line...
+      var vals = []
+      for (var j in initialVals)
+      {
+        if (initialVals[j] != "")
+        {
+          vals.push(initialVals[j]);
+        }
+      }
+
+      if (vals.length == 5 && vals[0] != "//")
+      {
+        // It is a line describing a vertex; get X, Y and Z first
+        vertexPositions.push(parseFloat(vals[0]));
+        vertexPositions.push(parseFloat(vals[1]));
+        vertexPositions.push(parseFloat(vals[2]));
+
+        // And then the texture coords
+        vertexTextureCoords.push(parseFloat(vals[3]));
+        vertexTextureCoords.push(parseFloat(vals[4]));
+
+        vertexCount += 1;
+      }
+    }
+
+    worldVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexPositions), gl.STATIC_DRAW);
+    worldVertexPositionBuffer.itemSize = 3;
+    worldVertexPositionBuffer.numItems = vertexCount;
+
+    worldVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexTextureCoords), gl.STATIC_DRAW);
+    worldVertexTextureCoordBuffer.itemSize = 2;
+    worldVertexTextureCoordBuffer.numItems = vertexCount;
+  }
+
+
+  function setupWorld()
+  {
+    var request = new XMLHttpRequest();
+    request.open("GET", "world.txt");
+    request.onreadystatechange = function()
+      {
+        if (request.readyState == 4)
+        {
+          handleLoadedWorld(request.responseText);
+        }
+      }
+    request.send();
+  }
+
+
+
+  function drawScene()
+  {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    perspective(45, 1.0, 0.1, 100.0);
+
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.enable(gl.BLEND);
+
+    loadIdentity();
+
+    mvRotate(lookUpDown, [1, 0, 0]);
+    mvRotate(360 - yRot, [0, 1, 0]);
+    mvTranslate(-xPos, -walkBias - 0.25, -zPos);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, mudTexture);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(textureCoordAttribute, worldVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexPositionBuffer);
+    gl.vertexAttribPointer(vertexPositionAttribute, worldVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLES, 0, worldVertexPositionBuffer.numItems);
+  }
+
+
+  function tick()
+  {
+    handleKeys();
+    drawScene();
+  }
+
+
+
+  function webGLStart()
+  {
+    initGL();
+    initShaders();
+    initTexture();
+    setupWorld();
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    gl.clearDepth(1.0);
+
+    document.onkeydown = handleKeyDown;
+    document.onkeyup = handleKeyUp;
+
+    setInterval(tick, 15);
+  }
+
+
+
+</script>
+
+
+</head>
+
+
+<body onload="webGLStart()">
+<a href="http://learningwebgl.com/blog/?p=1067">&lt;&lt; Back to Lesson 10</a><br />
+
+  <canvas id="lesson10-canvas" style="border: none;" width="500" height="500"></canvas>
+
+  <br/>
+Use the cursor keys or WASD to run around.
+
+<br/>
+<br/>
+<a href="http://learningwebgl.com/blog/?p=1067">&lt;&lt; Back to Lesson 10</a>
+</body>
+
+</html>
