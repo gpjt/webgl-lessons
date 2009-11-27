@@ -335,7 +335,7 @@
   {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, starTexture);
-    gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, starVertexTextureCoordBuffer);
     gl.vertexAttribPointer(textureCoordAttribute, starVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);

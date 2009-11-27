@@ -518,7 +518,7 @@
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, glassTexture);
-    gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
     var blending = document.getElementById("blending").checked;
     if (blending)

@@ -516,7 +516,7 @@
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
-    gl.uniform1f(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
