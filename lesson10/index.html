@@ -12,12 +12,9 @@
 
   uniform sampler2D uSampler;
 
-  uniform vec3 uColor;
-
   void main(void)
   {
-    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
-    gl_FragColor = textureColor * vec4(uColor, 1.0);
+    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
   }
 </script>
 
@@ -288,12 +285,12 @@
     if (currentlyPressedKeys[33])
     {
       // Page Up
-      lookUpDown += 1.5;
+      lookUpDown -= 1.5;
     }
     if (currentlyPressedKeys[34])
     {
       // Page Down
-      lookUpDown -= 1.5;
+      lookUpDown += 1.5;
     }
     if (currentlyPressedKeys[37] || currentlyPressedKeys[65])
     {
@@ -329,7 +326,7 @@
 
       if (walkBiasAngle <= 1.0)
       {
-          walkBiasAngle = 0.0;
+          walkBiasAngle = 360;
       }
       else
       {
@@ -414,14 +411,11 @@
 
     perspective(45, 1.0, 0.1, 100.0);
 
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-    gl.enable(gl.BLEND);
-
     loadIdentity();
 
     mvRotate(lookUpDown, [1, 0, 0]);
     mvRotate(360 - yRot, [0, 1, 0]);
-    mvTranslate(-xPos, -walkBias - 0.25, -zPos);
+    mvTranslate([-xPos, -walkBias - 0.25, -zPos]);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, mudTexture);
@@ -457,6 +451,9 @@
 
     gl.clearDepth(1.0);
 
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
@@ -477,7 +474,8 @@
   <canvas id="lesson10-canvas" style="border: none;" width="500" height="500"></canvas>
 
   <br/>
-Use the cursor keys or WASD to run around.
+Use the cursor keys or WASD to run around, and <code>Page Up</code>/<code>Page Down</code> to
+look up and down.
 
 <br/>
 <br/>
