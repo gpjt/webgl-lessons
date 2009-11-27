@@ -295,19 +295,19 @@
       // Page Down
       lookUpDown -= 1.5;
     }
-    if (currentlyPressedKeys[37])
+    if (currentlyPressedKeys[37] || currentlyPressedKeys[65])
     {
-      // Left cursor key
+      // Left cursor key or A
       yRot += 1.5;
     }
-    if (currentlyPressedKeys[39])
+    if (currentlyPressedKeys[39] || currentlyPressedKeys[68])
     {
-      // Right cursor key
+      // Right cursor key or D
       yRot -= 1.5;
     }
-    if (currentlyPressedKeys[38])
+    if (currentlyPressedKeys[38] || currentlyPressedKeys[87])
     {
-      // Up cursor key
+      // Up cursor key or W
       xPos -= Math.sin(yRot * piOver180 ) * 0.05;
       zPos -= Math.cos(yRot * piOver180 ) * 0.05;
 
@@ -321,7 +321,7 @@
       }
       walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
     }
-    if (currentlyPressedKeys[40])
+    if (currentlyPressedKeys[40] || currentlyPressedKeys[83])
     {
       // Down cursor key
       xPos += Math.sin(yRot * piOver180 ) * 0.05;
