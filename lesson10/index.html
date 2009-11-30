@@ -279,61 +279,57 @@
   var walkBiasAngle = 0;
   var walkBias = 0;
 
+  var speed = 0;
+  var spin = 0;
+  var nod = 0;
 
   function handleKeys()
   {
     if (currentlyPressedKeys[33])
     {
       // Page Up
-      lookUpDown -= 1.5;
+      nod = -1.5;
     }
-    if (currentlyPressedKeys[34])
+    else if (currentlyPressedKeys[34])
     {
       // Page Down
-      lookUpDown += 1.5;
+      nod = 1.5;
     }
+    else
+    {
+      nod = 0;
+    }
+
     if (currentlyPressedKeys[37] || currentlyPressedKeys[65])
     {
       // Left cursor key or A
-      yRot += 1.5;
+      spin = 1.5;
     }
-    if (currentlyPressedKeys[39] || currentlyPressedKeys[68])
+    else if (currentlyPressedKeys[39] || currentlyPressedKeys[68])
     {
       // Right cursor key or D
-      yRot -= 1.5;
+      spin = -1.5;
     }
+    else
+    {
+      spin = 0;
+    }
+
     if (currentlyPressedKeys[38] || currentlyPressedKeys[87])
     {
       // Up cursor key or W
-      xPos -= Math.sin(yRot * piOver180 ) * 0.05;
-      zPos -= Math.cos(yRot * piOver180 ) * 0.05;
-
-      if (walkBiasAngle >= 359.0)
-      {
-          walkBiasAngle = 0.0;
-      }
-      else
-      {
-          walkBiasAngle += 10;
-      }
-      walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
+      speed = 0.05;
     }
-    if (currentlyPressedKeys[40] || currentlyPressedKeys[83])
+    else if (currentlyPressedKeys[40] || currentlyPressedKeys[83])
     {
       // Down cursor key
-      xPos += Math.sin(yRot * piOver180 ) * 0.05;
-      zPos += Math.cos(yRot * piOver180 ) * 0.05;
-
-      if (walkBiasAngle <= 1.0)
-      {
-          walkBiasAngle = 360;
-      }
-      else
-      {
-          walkBiasAngle -= 10;
-      }
-      walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
+      speed = -0.05;
     }
+    else
+    {
+      speed = 0;
+    }
+
   }
 
 
@@ -439,10 +435,38 @@
   }
 
 
+  var lastTime = 0;
+  function animate()
+  {
+    var timeNow = new Date().getTime();
+    if (lastTime != 0)
+    {
+      var elapsed = timeNow - lastTime;
+      var scale = elapsed / 15;  // "Fiddle factor" to make us move at a speed that feels right :-)
+
+      if (speed != 0)
+      {
+        xPos -= Math.sin(yRot * piOver180 ) * speed * scale;
+        zPos -= Math.cos(yRot * piOver180 ) * speed * scale;
+
+        walkBiasAngle += 10 * scale;
+        walkBias = Math.sin(walkBiasAngle * piOver180) / 20;
+      }
+
+      yRot += spin * scale;
+
+      lookUpDown += nod * scale;
+
+    }
+    lastTime = timeNow;
+  }
+
+
   function tick()
   {
     handleKeys();
     drawScene();
+    animate();
   }
 
 
