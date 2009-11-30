@@ -337,8 +337,8 @@
   }
 
 
-  var worldVertexPositionBuffer;
-  var worldVertexTextureCoordBuffer;
+  var worldVertexPositionBuffer = null;
+  var worldVertexTextureCoordBuffer = null;
   function handleLoadedWorld(data)
   {
     var lines = data.split("\n");
@@ -409,13 +409,20 @@
   {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+    if (worldVertexTextureCoordBuffer == null || worldVertexPositionBuffer == null)
+    {
+      return;
+    }
+
+    document.getElementById("loadingtext").textContent = "";
+
     perspective(45, 1.0, 0.1, 100.0);
 
     loadIdentity();
 
     mvRotate(lookUpDown, [1, 0, 0]);
     mvRotate(360 - yRot, [0, 1, 0]);
-    mvTranslate([-xPos, -walkBias - 0.25, -zPos]);
+    mvTranslate([-xPos, -walkBias - 0.4, -zPos]);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, mudTexture);
@@ -464,6 +471,17 @@
 
 </script>
 
+<style type="text/css">
+    #loadingtext {
+        position:absolute;
+        top:250px;
+        left:150px;
+        font-size:2em;
+        color: white;
+    }
+</style>
+
+
 
 </head>
 
@@ -473,6 +491,8 @@
 
   <canvas id="lesson10-canvas" style="border: none;" width="500" height="500"></canvas>
 
+  <div id="loadingtext">Loading world...</div>
+
   <br/>
 Use the cursor keys or WASD to run around, and <code>Page Up</code>/<code>Page Down</code> to
 look up and down.
@@ -480,6 +500,7 @@ look up and down.
 <br/>
 <br/>
 <a href="http://learningwebgl.com/blog/?p=1067">&lt;&lt; Back to Lesson 10</a>
+
 </body>
 
 </html>
