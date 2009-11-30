@@ -218,7 +218,7 @@
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderi(shader, gl.COMPILE_STATUS))
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
       {
           alert(gl.getShaderInfoLog(shader));
           return null;
@@ -245,7 +245,7 @@
     gl.attachShader(mandelbrotProgram, fragmentShader);
     gl.linkProgram(mandelbrotProgram);
 
-    if (!gl.getProgrami(mandelbrotProgram, gl.LINK_STATUS))
+    if (!gl.getProgramParameter(mandelbrotProgram, gl.LINK_STATUS))
     {
       alert("Could not initialise mandelbrot shaders");
     }
@@ -264,7 +264,7 @@
     gl.attachShader(colorProgram, fragmentShader);
     gl.linkProgram(colorProgram);
 
-    if (!gl.getProgrami(colorProgram, gl.LINK_STATUS))
+    if (!gl.getProgramParameter(colorProgram, gl.LINK_STATUS))
     {
       alert("Could not initialise color shaders");
     }

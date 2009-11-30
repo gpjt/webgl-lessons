@@ -127,7 +127,7 @@
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderi(shader, gl.COMPILE_STATUS))
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
       {
           alert(gl.getShaderInfoLog(shader));
           return null;
@@ -149,7 +149,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgrami(shaderProgram, gl.LINK_STATUS))
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
     {
       alert("Could not initialise shaders");
     }
