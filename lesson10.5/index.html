@@ -382,6 +382,7 @@
   }
 
 
+
   var worldVertexPositionBuffer = null;
   var worldVertexTextureCoordBuffer = null;
   var worldVertexNormalBuffer = null;
@@ -393,41 +394,54 @@
     var vertexTextureCoords = [];
     var vertexNormals = [];
     var currentTriangle = []
+    function addTriangleToLists(triangle, normal)
+    {
+      for (var i in triangle)
+      {
+        vertex = triangle[i];
+
+        position = vertex.position.add(normal.x(0.002))
+        vertexPositions.push(position.e(1));
+        vertexPositions.push(position.e(2));
+        vertexPositions.push(position.e(3));
+
+        vertexTextureCoords.push(vertex.textureCoords[0]);
+        vertexTextureCoords.push(vertex.textureCoords[1]);
+
+        vertexNormals.push(normal.e(1));
+        vertexNormals.push(normal.e(2));
+        vertexNormals.push(normal.e(3));
+      }
+    }
+
+
     for (var i in lines)
     {
       var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
       if (vals.length == 5 && vals[0] != "//")
       {
-        // It is a line describing a vertex; get X, Y and Z first
-        vertexPosition = $V([parseFloat(vals[0]), parseFloat(vals[1]), parseFloat(vals[2])]);
-        vertexPositions.push(vertexPosition.e(1));
-        vertexPositions.push(vertexPosition.e(2));
-        vertexPositions.push(vertexPosition.e(3));
+        // It is a line describing a vertex.  Construct an object to
+        // represent it:
+        vertex = {
+          position : $V([parseFloat(vals[0]), parseFloat(vals[1]), parseFloat(vals[2])]),
+          textureCoords : [parseFloat(vals[3]), parseFloat(vals[4])]
+        };
+        currentTriangle.push(vertex);
 
-        // And then the texture coords
-        vertexTextureCoords.push(parseFloat(vals[3]));
-        vertexTextureCoords.push(parseFloat(vals[4]));
-
-        vertexCount += 1;
-
-        currentTriangle.push(vertexPosition);
         if (currentTriangle.length == 3)
         {
-          var sideVector1 = currentTriangle[1].subtract(currentTriangle[0]);
-          var sideVector2 = currentTriangle[0].subtract(currentTriangle[2]);
+          var sideVector1 = currentTriangle[1].position.subtract(currentTriangle[0].position);
+          var sideVector2 = currentTriangle[0].position.subtract(currentTriangle[2].position);
           var normal = sideVector1.cross(sideVector2).toUnitVector();
 
-          for (var i=0; i < 3; i++)
-          {
-            vertexNormals.push(normal.e(1));
-            vertexNormals.push(normal.e(2));
-            vertexNormals.push(normal.e(3));
-          }
+          // Add front and back-facing triangles
+          addTriangleToLists(currentTriangle, normal);
+          addTriangleToLists(currentTriangle, normal.x(-1));
 
           currentTriangle = [];
+          vertexCount += 6;
         }
       }
-
 
     }
 
@@ -500,8 +514,10 @@
       var lightingDirection = Vector.create([
         parseFloat(document.getElementById("lightDirectionX").value),
         parseFloat(document.getElementById("lightDirectionY").value),
-        parseFloat(document.getElementById("lightDirectionZ").value)
+        parseFloat(document.getElementById("lightDirectionZ").value),
+        0
       ]);
+      lightingDirection = mvMatrix.multiply(lightingDirection);
       var adjustedLD = lightingDirection.toUnitVector().x(-1);
       var flatLD = adjustedLD.flatten();
       gl.uniform3f(
