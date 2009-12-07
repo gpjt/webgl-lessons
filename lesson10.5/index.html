@@ -395,19 +395,7 @@
     var currentTriangle = []
     for (var i in lines)
     {
-      var initialVals = lines[i].split(" ");
-      // If there are two consecutive spaces in a line, JavaScript's
-      // split function will return an empty string as a token.  Let's
-      // get rid of them before processing the line...
-      var vals = []
-      for (var j in initialVals)
-      {
-        if (initialVals[j] != "")
-        {
-          vals.push(initialVals[j]);
-        }
-      }
-
+      var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
       if (vals.length == 5 && vals[0] != "//")
       {
         // It is a line describing a vertex; get X, Y and Z first
