@@ -394,16 +394,23 @@
     var vertexTextureCoords = [];
     var vertexNormals = [];
     var currentTriangle = []
-    function addTriangleToLists(triangle, normal)
+    function addTriangleToLists(triangle, normal, flip)
     {
+      if (flip)
+      {
+        triangle = [triangle[0], triangle[2], triangle[1]];
+      }
+      else
+      {
+        normal = normal.x(-1);
+      }
       for (var i in triangle)
       {
         vertex = triangle[i];
 
-        position = vertex.position.add(normal.x(0.002))
-        vertexPositions.push(position.e(1));
-        vertexPositions.push(position.e(2));
-        vertexPositions.push(position.e(3));
+        vertexPositions.push(vertex.position.e(1));
+        vertexPositions.push(vertex.position.e(2));
+        vertexPositions.push(vertex.position.e(3));
 
         vertexTextureCoords.push(vertex.textureCoords[0]);
         vertexTextureCoords.push(vertex.textureCoords[1]);
@@ -435,8 +442,8 @@
           var normal = sideVector1.cross(sideVector2).toUnitVector();
 
           // Add front and back-facing triangles
-          addTriangleToLists(currentTriangle, normal);
-          addTriangleToLists(currentTriangle, normal.x(-1));
+          addTriangleToLists(currentTriangle, normal, false);
+          addTriangleToLists(currentTriangle, normal, true);
 
           currentTriangle = [];
           vertexCount += 6;
@@ -601,6 +608,8 @@
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+
+    gl.enable(gl.CULL_FACE);
 
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
