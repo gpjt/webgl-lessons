@@ -216,10 +216,13 @@
   function handleLoadedTexture(image, texture)
   {
     gl.enable(gl.TEXTURE_2D);
+
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
@@ -269,18 +272,31 @@
     mvMatrix = mvMatrix.x(m);
   }
 
+
+  function createTranslationMatrix(v)
+  {
+    return Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4()
+  }
+
+
   function mvTranslate(v)
   {
-    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
+    multMatrix(createTranslationMatrix(v));
   }
+
+
+  function createRotationMatrix(angle, v)
+  {
+    var arad = angle * Math.PI / 180.0;
+    return Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
+  }
+
 
   function mvRotate(ang, v)
   {
-    var arad = ang * Math.PI / 180.0;
-    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
+    multMatrix(createRotationMatrix(angle, v));
   }
+
 
   var pMatrix;
   function perspective(fovy, aspect, znear, zfar)
@@ -301,6 +317,50 @@
     normalMatrix = normalMatrix.transpose();
     var nUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     gl.uniformMatrix4fv(nUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
+  }
+
+
+  var mouseDown = false;
+  var lastMousePoint = null;
+
+  var cameraMatrix = Matrix.I(4);
+
+  function handleMouseDown(event)
+  {
+    mouseDown = true;
+    lastMousePoint = [event.clientX, event.clientY];
+  }
+
+
+  function handleMouseUp(event)
+  {
+    mouseDown = false;
+    lastMousePoint = null;
+  }
+
+
+  function handleMouseMove(event)
+  {
+    if (!mouseDown)
+    {
+      return;
+    }
+    var newX = event.clientX;
+    var newY = event.clientY;
+    if (lastMousePoint != null)
+    {
+      var newCameraMatrix = Matrix.I(4);
+
+      var deltaX = lastMousePoint[0] - newX;
+      newCameraMatrix = newCameraMatrix.x(createRotationMatrix(-deltaX / 10, [0, 1, 0]));
+
+      var deltaY = lastMousePoint[1] - newY;
+      newCameraMatrix = newCameraMatrix.x(createRotationMatrix(-deltaY / 10, [1, 0, 0]));
+
+      cameraMatrix = newCameraMatrix.x(cameraMatrix);
+    }
+
+    lastMousePoint = [newX, newY];
   }
 
 
@@ -393,9 +453,6 @@
   }
 
 
-  var xRot = 0;
-  var yRot = 0;
-  var zRot = 0;
   function drawScene()
   {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -403,11 +460,8 @@
     perspective(45, 1.0, 0.1, 100.0);
     loadIdentity();
 
-    mvTranslate([0.0, 0.0, -6.0])
-
-    mvRotate(xRot, [1, 0, 0]);
-    mvRotate(yRot, [0, 1, 0]);
-    mvRotate(zRot, [0, 0, 1]);
+    mvTranslate([0, 0, -6]);
+    multMatrix(cameraMatrix);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
@@ -461,26 +515,9 @@
   }
 
 
-  var lastTime = 0;
-  function animate()
-  {
-    var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
-      var elapsed = timeNow - lastTime;
-
-      xRot += (20 * elapsed) / 1000.0;
-      yRot += (20 * elapsed) / 1000.0;
-      zRot += (20 * elapsed) / 1000.0;
-    }
-    lastTime = timeNow;
-  }
-
-
   function tick()
   {
     drawScene();
-    animate();
   }
 
 
@@ -496,6 +533,10 @@
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+
+    document.onmousedown = handleMouseDown;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = handleMouseMove;
 
     initBuffers();
 
