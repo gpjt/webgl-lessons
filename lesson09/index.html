@@ -74,10 +74,8 @@
 
 
   var gl;
-  function initGL()
+  function initGL(canvas)
   {
-    var canvas = document.getElementById("lesson09-canvas");
-
     try
     {
       gl = canvas.getContext("webkit-3d");
@@ -511,7 +509,8 @@
 
   function webGLStart()
   {
-    initGL();
+    var canvas = document.getElementById("lesson09-canvas");
+    initGL(canvas);
     initShaders();
     initTexture();
     initBuffers();

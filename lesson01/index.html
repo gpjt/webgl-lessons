@@ -62,10 +62,8 @@
   // End of compatibility code
 
   var gl;
-  function initGL()
+  function initGL(canvas)
   {
-    var canvas = document.getElementById("lesson01-canvas");
-
     try
     {
       gl = canvas.getContext("webkit-3d");
@@ -267,7 +265,8 @@
 
   function webGLStart()
   {
-    initGL();
+    var canvas = document.getElementById("lesson01-canvas");
+    initGL(canvas);
     initShaders();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);

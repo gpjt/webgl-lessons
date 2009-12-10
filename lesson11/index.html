@@ -94,10 +94,8 @@
 
 
   var gl;
-  function initGL()
+  function initGL(canvas)
   {
-    var canvas = document.getElementById("lesson11-canvas");
-
     try
     {
       gl = canvas.getContext("webkit-3d");
@@ -323,7 +321,7 @@
   var mouseDown = false;
   var lastMousePoint = null;
 
-  var cameraMatrix = Matrix.I(4);
+  var moonRotationMatrix = Matrix.I(4);
 
   function handleMouseDown(event)
   {
@@ -349,15 +347,15 @@
     var newY = event.clientY;
     if (lastMousePoint != null)
     {
-      var newCameraMatrix = Matrix.I(4);
+      var newRotationMatrix = Matrix.I(4);
 
       var deltaX = lastMousePoint[0] - newX;
-      newCameraMatrix = newCameraMatrix.x(createRotationMatrix(-deltaX / 10, [0, 1, 0]));
+      newRotationMatrix = newRotationMatrix.x(createRotationMatrix(-deltaX / 10, [0, 1, 0]));
 
       var deltaY = lastMousePoint[1] - newY;
-      newCameraMatrix = newCameraMatrix.x(createRotationMatrix(-deltaY / 10, [1, 0, 0]));
+      newRotationMatrix = newRotationMatrix.x(createRotationMatrix(-deltaY / 10, [1, 0, 0]));
 
-      cameraMatrix = newCameraMatrix.x(cameraMatrix);
+      moonRotationMatrix = newRotationMatrix.x(moonRotationMatrix);
     }
 
     lastMousePoint = [newX, newY];
@@ -458,10 +456,6 @@
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
-    loadIdentity();
-
-    mvTranslate([0, 0, -6]);
-    multMatrix(cameraMatrix);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
@@ -480,7 +474,6 @@
         parseFloat(document.getElementById("lightDirectionZ").value),
         0
       ]);
-      lightingDirection = mvMatrix.multiply(lightingDirection);
       var adjustedLD = lightingDirection.toUnitVector().x(-1);
       var flatLD = adjustedLD.flatten();
       gl.uniform3f(
@@ -495,6 +488,12 @@
         parseFloat(document.getElementById("directionalB").value)
       );
     }
+
+    loadIdentity();
+
+    mvTranslate([0, 0, -6]);
+
+    multMatrix(moonRotationMatrix);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
     gl.vertexAttribPointer(vertexPositionAttribute, moonVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -523,7 +522,8 @@
 
   function webGLStart()
   {
-    initGL();
+    canvas = document.getElementById("lesson11-canvas");
+    initGL(canvas);
     initShaders();
     initTexture();
 
@@ -534,9 +534,9 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    document.onmousedown = handleMouseDown;
-    document.onmouseup = handleMouseUp;
-    document.onmousemove = handleMouseMove;
+    canvas.onmousedown = handleMouseDown;
+    canvas.onmouseup = handleMouseUp;
+    canvas.onmousemove = handleMouseMove;
 
     initBuffers();
 
@@ -565,8 +565,8 @@
 <table style="border: 0; padding: 10px;">
 <tr>
 <td><b>Direction:</b>
-<td>X: <input type="text" id="lightDirectionX" value="-0.25" />
-<td>Y: <input type="text" id="lightDirectionY" value="-0.25" />
+<td>X: <input type="text" id="lightDirectionX" value="-1.0" />
+<td>Y: <input type="text" id="lightDirectionY" value="-1.0" />
 <td>Z: <input type="text" id="lightDirectionZ" value="-1.0" />
 </tr>
 <tr>
