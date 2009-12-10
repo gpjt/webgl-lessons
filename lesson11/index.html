@@ -535,8 +535,8 @@
     gl.depthFunc(gl.LEQUAL);
 
     canvas.onmousedown = handleMouseDown;
-    canvas.onmouseup = handleMouseUp;
-    canvas.onmousemove = handleMouseMove;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = handleMouseMove;
 
     initBuffers();
 
@@ -588,6 +588,8 @@
 </table>
 
 
+<br/>
+Moon texture courtesy of <a href="http://maps.jpl.nasa.gov/">the Jet Propulsion Laboratory</a>.
 <br/>
 <br/>
 
