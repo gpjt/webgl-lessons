@@ -75,10 +75,20 @@
   {
     try
     {
-      gl = canvas.getContext("webkit-3d");
+      gl = canvas.getContext("experimental-webgl");
     }
     catch(e)
     {
+    }
+    if (!gl)
+    {
+      try
+      {
+        gl = canvas.getContext("webkit-3d");
+      }
+      catch(e)
+      {
+      }
     }
     if (!gl)
     {
