@@ -11,12 +11,21 @@
   varying vec2 vTextureCoord;
   varying vec3 vLightWeighting;
 
+  uniform bool uUseTexture;
   uniform sampler2D uSampler;
 
   void main(void)
   {
-     vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
-     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+    vec4 textureColor;
+    if (uUseTexture)
+    {
+      textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+    }
+    else
+    {
+      textureColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
 </script>
 
@@ -232,6 +241,8 @@
     gl.generateMipmap(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
+
+    texture.loaded = true;
   }
 
 
@@ -240,6 +251,7 @@
   function initTexture()
   {
     moonTexture = gl.createTexture();
+    moonTexture.loaded = false;
     moonImage = new Image();
     moonImage.onload = function()
     {
@@ -511,9 +523,17 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexTextureCoordBuffer);
     gl.vertexAttribPointer(textureCoordAttribute, moonVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, moonTexture);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    if (moonTexture.loaded)
+    {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, moonTexture);
+      gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+      gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseTexture"), 1);
+    }
+    else
+    {
+      gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseTexture"), 0);
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexNormalBuffer);
     gl.vertexAttribPointer(vertexNormalAttribute, moonVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -532,7 +552,7 @@
 
   function webGLStart()
   {
-    canvas = document.getElementById("lesson11-canvas");
+    var canvas = document.getElementById("lesson11-canvas");
     initGL(canvas);
     initShaders();
     initTexture();
