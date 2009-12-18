@@ -192,8 +192,8 @@
 
   var shaderProgram;
   var vertexPositionAttribute;
-  var textureCoordAttribute;
   var vertexNormalAttribute;
+  var textureCoordAttribute;
   function initShaders()
   {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -214,11 +214,11 @@
     vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(vertexPositionAttribute);
 
-    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(textureCoordAttribute);
-
     vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
     gl.enableVertexAttribArray(vertexNormalAttribute);
+
+    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(textureCoordAttribute);
   }
 
 
@@ -289,15 +289,10 @@
   }
 
 
-  function createTranslationMatrix(v)
-  {
-    return Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4()
-  }
-
-
   function mvTranslate(v)
   {
-    multMatrix(createTranslationMatrix(v));
+    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
+    multMatrix(m);
   }
 
 
@@ -337,21 +332,22 @@
 
 
   var mouseDown = false;
-  var lastMousePoint = null;
+  var lastMouseX = null;
+  var lastMouseY = null;
 
   var moonRotationMatrix = Matrix.I(4);
 
   function handleMouseDown(event)
   {
     mouseDown = true;
-    lastMousePoint = [event.clientX, event.clientY];
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
   }
 
 
   function handleMouseUp(event)
   {
     mouseDown = false;
-    lastMousePoint = null;
   }
 
 
@@ -363,20 +359,17 @@
     }
     var newX = event.clientX;
     var newY = event.clientY;
-    if (lastMousePoint != null)
-    {
-      var newRotationMatrix = Matrix.I(4);
 
-      var deltaX = lastMousePoint[0] - newX;
-      newRotationMatrix = newRotationMatrix.x(createRotationMatrix(-deltaX / 10, [0, 1, 0]));
+    var deltaX = newX - lastMouseX
+    var newRotationMatrix = createRotationMatrix(deltaX / 10, [0, 1, 0]);
 
-      var deltaY = lastMousePoint[1] - newY;
-      newRotationMatrix = newRotationMatrix.x(createRotationMatrix(-deltaY / 10, [1, 0, 0]));
+    var deltaY = newY - lastMouseY;
+    newRotationMatrix = newRotationMatrix.x(createRotationMatrix(deltaY / 10, [1, 0, 0]));
 
-      moonRotationMatrix = newRotationMatrix.x(moonRotationMatrix);
-    }
+    moonRotationMatrix = newRotationMatrix.x(moonRotationMatrix);
 
-    lastMousePoint = [newX, newY];
+    lastMouseX = newX
+    lastMouseY = newY;
   }
 
 
@@ -394,8 +387,6 @@
     var vertexPositionData = [];
     var normalData = [];
     var textureCoordData = [];
-    var indexData = [];
-
     for (var latNumber = 0; latNumber <= latitudeBands; latNumber++)
     {
       var theta = latNumber * Math.PI / latitudeBands;
@@ -426,6 +417,7 @@
     }
 
 
+    var indexData = [];
     longitudeBands += 1;
     for (var latNumber = 0; latNumber < latitudeBands; latNumber++)
     {
