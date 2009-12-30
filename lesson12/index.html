@@ -41,7 +41,8 @@
 
   void main(void)
   {
-    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+    gl_Position = uPMatrix * mvPosition;
     vTextureCoord = aTextureCoord;
 
     if (!uUseLighting)
@@ -50,8 +51,10 @@
     }
     else
     {
+      vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+
       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
-      float directionalLightWeighting = max(dot(transformedNormal.xyz, uPointLightingLocation), 0.0);
+      float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);
       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
   }
@@ -598,16 +601,11 @@
         parseFloat(document.getElementById("ambientB").value)
       );
 
-      var pointLightingLocation = Vector.create([
+      gl.uniform3f(
+        gl.getUniformLocation(shaderProgram, "uPointLightingLocation"),
         parseFloat(document.getElementById("lightPositionX").value),
         parseFloat(document.getElementById("lightPositionY").value),
         parseFloat(document.getElementById("lightPositionZ").value)
-      ]);
-      var adjustedPLL = pointLightingLocation.toUnitVector().x(-1);
-      var flatPLL = adjustedPLL.flatten();
-      gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uPointLightingLocation"),
-        flatPLL[0], flatPLL[1], flatPLL[2]
       );
 
       gl.uniform3f(
