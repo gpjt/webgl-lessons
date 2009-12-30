@@ -31,8 +31,8 @@
 
   uniform vec3 uAmbientColor;
 
-  uniform vec3 uLightingDirection;
-  uniform vec3 uDirectionalColor;
+  uniform vec3 uPointLightingLocation;
+  uniform vec3 uPointLightingColor;
 
   uniform bool uUseLighting;
 
@@ -51,8 +51,8 @@
     else
     {
       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
-      float directionalLightWeighting = max(dot(transformedNormal.xyz, uLightingDirection), 0.0);
-      vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+      float directionalLightWeighting = max(dot(transformedNormal.xyz, uPointLightingLocation), 0.0);
+      vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
   }
 </script>
@@ -343,6 +343,7 @@
 
 
   var cubeVertexPositionBuffer;
+  var cubeVertexNormalBuffer;
   var cubeVertexTextureCoordBuffer;
   var cubeVertexIndexBuffer;
 
@@ -394,6 +395,49 @@
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
     cubeVertexPositionBuffer.itemSize = 3;
     cubeVertexPositionBuffer.numItems = 24;
+
+    cubeVertexNormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+    var vertexNormals = [
+      // Front face
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+
+      // Back face
+       0.0,  0.0, -1.0,
+       0.0,  0.0, -1.0,
+       0.0,  0.0, -1.0,
+       0.0,  0.0, -1.0,
+
+      // Top face
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+       0.0,  1.0,  0.0,
+
+      // Bottom face
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+       0.0, -1.0,  0.0,
+
+      // Right face
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+       1.0,  0.0,  0.0,
+
+      // Left face
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+      -1.0,  0.0,  0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
+    cubeVertexNormalBuffer.itemSize = 3;
+    cubeVertexNormalBuffer.numItems = 24;
 
     cubeVertexTextureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
@@ -534,6 +578,9 @@
   }
 
 
+  var moonAngle = 180;
+  var cubeAngle = 0;
+
   function drawScene()
   {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -551,23 +598,23 @@
         parseFloat(document.getElementById("ambientB").value)
       );
 
-      var lightingDirection = Vector.create([
-        parseFloat(document.getElementById("lightDirectionX").value),
-        parseFloat(document.getElementById("lightDirectionY").value),
-        parseFloat(document.getElementById("lightDirectionZ").value)
+      var pointLightingLocation = Vector.create([
+        parseFloat(document.getElementById("lightPositionX").value),
+        parseFloat(document.getElementById("lightPositionY").value),
+        parseFloat(document.getElementById("lightPositionZ").value)
       ]);
-      var adjustedLD = lightingDirection.toUnitVector().x(-1);
-      var flatLD = adjustedLD.flatten();
+      var adjustedPLL = pointLightingLocation.toUnitVector().x(-1);
+      var flatPLL = adjustedPLL.flatten();
       gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uLightingDirection"),
-        flatLD[0], flatLD[1], flatLD[2]
+        gl.getUniformLocation(shaderProgram, "uPointLightingLocation"),
+        flatPLL[0], flatPLL[1], flatPLL[2]
       );
 
       gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uDirectionalColor"),
-        parseFloat(document.getElementById("directionalR").value),
-        parseFloat(document.getElementById("directionalG").value),
-        parseFloat(document.getElementById("directionalB").value)
+        gl.getUniformLocation(shaderProgram, "uPointLightingColor"),
+        parseFloat(document.getElementById("pointR").value),
+        parseFloat(document.getElementById("pointG").value),
+        parseFloat(document.getElementById("pointB").value)
       );
     }
 
@@ -576,7 +623,9 @@
     mvTranslate([0, 0, -20]);
 
 
-    mvTranslate([-5, 0, 0]);
+    mvPushMatrix();
+    mvRotate(moonAngle, [0, 1, 0]);
+    mvTranslate([5, 0, 0]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
@@ -593,11 +642,17 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, moonVertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, moonVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvPopMatrix()
 
 
-    mvTranslate([10, 0, 0]);
+    mvPushMatrix();
+    mvRotate(cubeAngle, [0, 1, 0]);
+    mvTranslate([5, 0, 0]);
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     gl.vertexAttribPointer(vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+    gl.vertexAttribPointer(vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
     gl.vertexAttribPointer(textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -609,12 +664,30 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvPopMatrix()
   }
+
+
+  var lastTime = 0;
+  function animate()
+  {
+    var timeNow = new Date().getTime();
+    if (lastTime != 0)
+    {
+      var elapsed = timeNow - lastTime;
+
+      moonAngle += 0.05 * elapsed;
+      cubeAngle += 0.05 * elapsed;
+    }
+    lastTime = timeNow;
+  }
+
 
 
   function tick()
   {
     drawScene();
+    animate();
   }
 
 
@@ -654,20 +727,20 @@
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
 
 <br/>
-<h2>Directional light:</h2>
+<h2>Point light:</h2>
 
 <table style="border: 0; padding: 10px;">
 <tr>
-<td><b>Direction:</b>
-<td>X: <input type="text" id="lightDirectionX" value="-1.0" />
-<td>Y: <input type="text" id="lightDirectionY" value="-1.0" />
-<td>Z: <input type="text" id="lightDirectionZ" value="-1.0" />
+<td><b>Location:</b>
+<td>X: <input type="text" id="lightPositionX" value="0.0" />
+<td>Y: <input type="text" id="lightPositionY" value="0.0" />
+<td>Z: <input type="text" id="lightPositionZ" value="-20.0" />
 </tr>
 <tr>
 <td><b>Colour:</b>
-<td>R: <input type="text" id="directionalR" value="0.8" />
-<td>G: <input type="text" id="directionalG" value="0.8" />
-<td>B: <input type="text" id="directionalB" value="0.8" />
+<td>R: <input type="text" id="pointR" value="0.8" />
+<td>G: <input type="text" id="pointG" value="0.8" />
+<td>B: <input type="text" id="pointB" value="0.8" />
 </tr>
 </table>
 
