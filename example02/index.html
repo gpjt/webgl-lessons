@@ -11,8 +11,7 @@
 <script id="color-shader-fs" type="x-shader/x-fragment">
   varying vec4 vColor;
 
-  void main(void)
-  {
+  void main(void) {
     gl_FragColor = vColor;
   }
 </script>
@@ -28,8 +27,7 @@
   varying vec4 vColor;
 
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vColor = aColor;
   }
@@ -41,8 +39,7 @@
   varying vec2 vPlotPosition;
   varying vec4 vColor;
 
-  void main(void)
-  {
+  void main(void) {
     float cx = vPlotPosition.x;
     float cy = vPlotPosition.y;
 
@@ -62,21 +59,17 @@
     float tempX = 0.0;
     int i = 0;
     int runaway = 0;
-    do
-    {
+    do {
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (x * x + y * y > 50.0)
-      {
+      if (x * x + y * y > 50.0) {
         runaway = 1;
       }
       i ++;
-    }
-    while (i < 100 && runaway == 0);
+    } while (i < 100 && runaway == 0);
 
-    if (runaway == 1)
-    {
+    if (runaway == 1) {
       hue = float(i) / 200.0;
       saturation = 0.6;
       value = 1.0;
@@ -101,9 +94,7 @@
       else if (hueIndex == 5)
         gl_FragColor = vec4(value, p, q, 1.0);
 
-    }
-    else
-    {
+    } else {
       gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
   }
@@ -119,8 +110,7 @@
   varying vec2 vPlotPosition;
 
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vPlotPosition = aPlotPosition;
   }
@@ -137,14 +127,10 @@
   // code in this page uses the new name, but the compatibility
   // code that follows will stay here for the time being to make
   // sure that Firefox users can view the page.
-  try
-  {
+  try {
     WebGLFloatArray;
-  }
-  catch (e)
-  {
-    try
-    {
+  } catch (e) {
+    try {
       WebGLArrayBuffer = CanvasArrayBuffer;
       WebGLByteArray = CanvasByteArray;
       WebGLUnsignedByteArray = CanvasUnsignedByteArray;
@@ -153,9 +139,7 @@
       WebGLIntArray = CanvasIntArray;
       WebGLUnsignedIntArray = CanvasUnsignedIntArray;
       WebGLFloatArray = CanvasFloatArray;
-    }
-    catch (e)
-    {
+    } catch (e) {
       alert("Could not find Canvas array types for WebGL.");
     }
   }
@@ -163,37 +147,24 @@
 
 
   var gl;
-  function initGL(canvas)
-  {
-    try
-    {
+  function initGL(canvas) {
+    try {
       gl = canvas.getContext("experimental-webgl");
+    } catch(e) {
     }
-    catch(e)
-    {
-    }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("webkit-3d");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("moz-webgl");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
+    if (!gl) {
       alert("Could not initialise WebGL, sorry :-(");
     }
 
@@ -204,12 +175,10 @@
     // in the meantime (as, for example, there's no way to get shader
     // or program parameters that are vectors of integers).
     // See http://learningwebgl.com/blog/?p=1082 for details.
-    if (!gl.getProgramParameter)
-    {
+    if (!gl.getProgramParameter) {
       gl.getProgramParameter = gl.getProgrami
     }
-    if (!gl.getShaderParameter)
-    {
+    if (!gl.getShaderParameter) {
       gl.getShaderParameter = gl.getShaderi
     }
     // End of Chrome compatibility code
@@ -217,40 +186,32 @@
   }
 
 
-  function getShader(gl, id)
-  {
+  function getShader(gl, id) {
       var shaderScript = document.getElementById(id);
       if (!shaderScript)
           return null;
 
       var str = "";
       var k = shaderScript.firstChild;
-      while (k)
-      {
+      while (k) {
           if (k.nodeType == 3)
               str += k.textContent;
           k = k.nextSibling;
       }
 
       var shader;
-      if (shaderScript.type == "x-shader/x-fragment")
-      {
+      if (shaderScript.type == "x-shader/x-fragment") {
           shader = gl.createShader(gl.FRAGMENT_SHADER);
-      }
-      else if (shaderScript.type == "x-shader/x-vertex")
-      {
+      } else if (shaderScript.type == "x-shader/x-vertex") {
           shader = gl.createShader(gl.VERTEX_SHADER);
-      }
-      else
-      {
+      } else {
           return null;
       }
 
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-      {
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
           alert(gl.getShaderInfoLog(shader));
           return null;
       }
@@ -266,8 +227,7 @@
   var mandelbrotVertexPosAttr;
   var mandelbrotPlotPosAttr;
 
-  function initShaders()
-  {
+  function initShaders() {
     var fragmentShader = getShader(gl, "mandelbrot-shader-fs");
     var vertexShader = getShader(gl, "mandelbrot-shader-vs");
 
@@ -276,8 +236,7 @@
     gl.attachShader(mandelbrotProgram, fragmentShader);
     gl.linkProgram(mandelbrotProgram);
 
-    if (!gl.getProgramParameter(mandelbrotProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(mandelbrotProgram, gl.LINK_STATUS)) {
       alert("Could not initialise mandelbrot shaders");
     }
 
@@ -295,8 +254,7 @@
     gl.attachShader(colorProgram, fragmentShader);
     gl.linkProgram(colorProgram);
 
-    if (!gl.getProgramParameter(colorProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(colorProgram, gl.LINK_STATUS)) {
       alert("Could not initialise color shaders");
     }
 
@@ -321,45 +279,40 @@
   }
 
   function mvPopMatrix() {
-    if (mvMatrixStack.length == 0)
+    if (mvMatrixStack.length == 0) {
       throw "Invalid popMatrix!";
+    }
     mvMatrix = mvMatrixStack.pop();
     return mvMatrix;
   }
 
-  function loadIdentity()
-  {
+  function loadIdentity() {
     mvMatrix = Matrix.I(4);
   }
 
 
-  function multMatrix(m)
-  {
+  function multMatrix(m) {
     mvMatrix = mvMatrix.x(m);
   }
 
-  function mvTranslate(v)
-  {
+  function mvTranslate(v) {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
-  function mvRotate(ang, v)
-  {
+  function mvRotate(ang, v) {
     var arad = ang * Math.PI / 180.0;
     var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
   var pMatrix;
-  function perspective(fovy, aspect, znear, zfar)
-  {
+  function perspective(fovy, aspect, znear, zfar) {
     pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
-  function setMatrixUniforms()
-  {
+  function setMatrixUniforms() {
     var pUniform = gl.getUniformLocation(mandelbrotProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
@@ -369,8 +322,7 @@
 
 
   var cubes = Array();
-  function MandelbrotCube(xPos, yPos, zPos, xVel, yVel, zVel, xRot, yRot, zRot)
-  {
+  function MandelbrotCube(xPos, yPos, zPos, xVel, yVel, zVel, xRot, yRot, zRot) {
     this.xPos = xPos;
     this.yPos = yPos;
     this.zPos = zPos;
@@ -392,54 +344,41 @@
     this.zoomCenterY = 0.014286693904085048;
 
 
-    this.animate = function(elapsed)
-    {
+    this.animate = function(elapsed) {
       this.xRot += (20 * elapsed) / 1000.0;
       this.yRot += (90 * elapsed) / 1000.0;
       this.zRot += (0 * elapsed) / 1000.0;
       this.xPos += this.xVel;
       this.yPos += this.yVel;
       this.zPos += this.zVel;
-      if (this.xPos >= 4 || this.xPos <= -4)
-      {
+      if (this.xPos >= 4 || this.xPos <= -4) {
         this.xVel = -this.xVel;
       }
-      if (this.yPos >= 4 || this.yPos <= -4)
-      {
+      if (this.yPos >= 4 || this.yPos <= -4) {
         this.yVel = -this.yVel;
       }
-      if (this.zPos >= -9 || this.zPos <= -24)
-      {
+      if (this.zPos >= -9 || this.zPos <= -24) {
         this.zVel = -this.zVel;
       }
 
-      for (var i in this.zooms)
-      {
-        if (this.zooms[i] < 1 || this.zooms[i] > 10000)
-        {
+      for (var i in this.zooms) {
+        if (this.zooms[i] < 1 || this.zooms[i] > 10000) {
           this.zoomRates[i] = 1 / this.zoomRates[i];
         }
         this.zooms[i] = this.zooms[i] * this.zoomRates[i];
 
-        if (this.zoomRates[i] > 1)
-        {
-          if (this.centerOffsetsX[i] != this.zoomCenterX)
-          {
+        if (this.zoomRates[i] > 1) {
+          if (this.centerOffsetsX[i] != this.zoomCenterX) {
             this.centerOffsetsX[i] += (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
           }
-          if (this.centerOffsetsY[i] != this.zoomCenterY)
-          {
+          if (this.centerOffsetsY[i] != this.zoomCenterY) {
             this.centerOffsetsY[i] += (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
           }
-        }
-        else
-        {
-          if (this.centerOffsetsX[i] != 0)
-          {
+        } else {
+          if (this.centerOffsetsX[i] != 0) {
             this.centerOffsetsX[i] -= (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
           }
-          if (this.centerOffsetsY[i] != 0)
-          {
+          if (this.centerOffsetsY[i] != 0) {
             this.centerOffsetsY[i] -= (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
           }
         }
@@ -447,8 +386,7 @@
     }
 
 
-    this.draw = function()
-    {
+    this.draw = function() {
       gl.useProgram(mandelbrotProgram);
       loadIdentity();
 
@@ -464,8 +402,7 @@
       var positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       var positions = [];
-      for (var i = 0; i < 6; i++)
-      {
+      for (var i = 0; i < 6; i++) {
         positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);;
         positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);
         positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
@@ -489,8 +426,7 @@
   var boundingBoxVertexIndexBuffer;
   var cubeVertexPositionBuffer;
   var cubeVertexIndexBuffer;
-  function initBuffers()
-  {
+  function initBuffers() {
     boundingBoxVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, boundingBoxVertexPositionBuffer);
     var vertices = [
@@ -627,14 +563,12 @@
   }
 
 
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
 
-    for (var i in cubes)
-    {
+    for (var i in cubes) {
       cubes[i].draw();
     }
 
@@ -654,14 +588,11 @@
 
 
   var lastTime = 0;
-  function animate()
-  {
+  function animate() {
     var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
+    if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
-      for (var i in cubes)
-      {
+      for (var i in cubes) {
         cubes[i].animate(elapsed);
       }
     }
@@ -669,18 +600,17 @@
   }
 
 
-  function tick()
-  {
+  function tick() {
     drawScene();
     animate();
   }
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     var canvas = document.getElementById("example02-canvas");
     initGL(canvas);
     initShaders();
+    initBuffers();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -689,8 +619,7 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    for (var i=0; i < 10; i++)
-    {
+    for (var i=0; i < 10; i++) {
       cubes.push(
         new MandelbrotCube(
           0, 0, -12,
@@ -699,8 +628,6 @@
         )
       );
     }
-
-    initBuffers();
 
     setInterval(tick, 15);
   }
