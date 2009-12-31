@@ -7,8 +7,7 @@
 <script id="shader-fs" type="x-shader/x-fragment">
   varying vec2 vPosition;
 
-  void main(void)
-  {
+  void main(void) {
     float cx = vPosition.x;
     float cy = vPosition.y;
 
@@ -28,21 +27,17 @@
     float tempX = 0.0;
     int i = 0;
     int runaway = 0;
-    do
-    {
+    do {
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (x * x + y * y > 100.0)
-      {
+      if (x * x + y * y > 100.0) {
         runaway = 1;
       }
       i ++;
-    }
-    while (i < 100 && runaway == 0);
+    } while (i < 100 && runaway == 0);
 
-    if (runaway == 1)
-    {
+    if (runaway == 1) {
       hue = float(i) / 200.0;
       saturation = 0.6;
       value = 1.0;
@@ -67,9 +62,7 @@
       else if (hueIndex == 5)
         gl_FragColor = vec4(value, p, q, 1.0);
 
-    }
-    else
-    {
+    } else {
       gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
   }
@@ -81,8 +74,7 @@
 
   varying vec2 vPosition;
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = vec4(aVertexPosition, 1.0, 1.0);
     vPosition = aPlotPosition;
   }
@@ -99,14 +91,10 @@
   // code in this page uses the new name, but the compatibility
   // code that follows will stay here for the time being to make
   // sure that Firefox users can view the page.
-  try
-  {
+  try {
     WebGLFloatArray;
-  }
-  catch (e)
-  {
-    try
-    {
+  } catch (e) {
+    try {
       WebGLArrayBuffer = CanvasArrayBuffer;
       WebGLByteArray = CanvasByteArray;
       WebGLUnsignedByteArray = CanvasUnsignedByteArray;
@@ -115,46 +103,31 @@
       WebGLIntArray = CanvasIntArray;
       WebGLUnsignedIntArray = CanvasUnsignedIntArray;
       WebGLFloatArray = CanvasFloatArray;
-    }
-    catch (e)
-    {
+    } catch (e) {
       alert("Could not find Canvas array types for WebGL.");
     }
   }
   // End of compatibility code
 
   var gl;
-  function initGL(canvas)
-  {
-    try
-    {
+  function initGL(canvas) {
+    try {
       gl = canvas.getContext("experimental-webgl");
+    } catch(e) {
     }
-    catch(e)
-    {
-    }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("webkit-3d");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("moz-webgl");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
+    if (!gl) {
       alert("Could not initialise WebGL, sorry :-(");
     }
 
@@ -165,12 +138,10 @@
     // in the meantime (as, for example, there's no way to get shader
     // or program parameters that are vectors of integers).
     // See http://learningwebgl.com/blog/?p=1082 for details.
-    if (!gl.getProgramParameter)
-    {
+    if (!gl.getProgramParameter) {
       gl.getProgramParameter = gl.getProgrami
     }
-    if (!gl.getShaderParameter)
-    {
+    if (!gl.getShaderParameter) {
       gl.getShaderParameter = gl.getShaderi
     }
     // End of Chrome compatibility code
@@ -178,40 +149,33 @@
   }
 
 
-  function getShader(gl, id)
-  {
+  function getShader(gl, id) {
+
       var shaderScript = document.getElementById(id);
       if (!shaderScript)
           return null;
 
       var str = "";
       var k = shaderScript.firstChild;
-      while (k)
-      {
+      while (k) {
           if (k.nodeType == 3)
               str += k.textContent;
           k = k.nextSibling;
       }
 
       var shader;
-      if (shaderScript.type == "x-shader/x-fragment")
-      {
+      if (shaderScript.type == "x-shader/x-fragment") {
           shader = gl.createShader(gl.FRAGMENT_SHADER);
-      }
-      else if (shaderScript.type == "x-shader/x-vertex")
-      {
+      } else if (shaderScript.type == "x-shader/x-vertex") {
           shader = gl.createShader(gl.VERTEX_SHADER);
-      }
-      else
-      {
+      } else {
           return null;
       }
 
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-      {
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
           alert(gl.getShaderInfoLog(shader));
           return null;
       }
@@ -221,8 +185,8 @@
 
   var shaderProgram;
   var aVertexPosition;
-  function initShaders()
-  {
+  function initShaders() {
+
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -231,8 +195,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -254,8 +217,7 @@
   var zoomCenterY;
 
   var vertexPositionBuffer;
-  function initBuffers()
-  {
+  function initBuffers() {
     vertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     var vertices = [
@@ -277,8 +239,7 @@
       [ 0.7, -1.2],
       [-2.2, -1.2],
   ];
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -289,8 +250,7 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, plotPositionBuffer);
     var cornerIx;
     corners = [];
-    for (cornerIx in baseCorners)
-    {
+    for (cornerIx in baseCorners) {
       x = baseCorners[cornerIx][0];
       y = baseCorners[cornerIx][1];
       corners.push(x / zoom + centerOffsetX);
@@ -306,14 +266,12 @@
 
     zoom *= 1.02;
     document.getElementById("zoomOutput").value = zoom;
-    if (centerOffsetX != zoomCenterX)
-    {
+    if (centerOffsetX != zoomCenterX) {
       centerOffsetX += (zoomCenterX - centerOffsetX) / 20;
     }
     document.getElementById("centerOffsetXOutput").value = centerOffsetX;
 
-    if (centerOffsetY != zoomCenterY)
-    {
+    if (centerOffsetY != zoomCenterY) {
       centerOffsetY += (zoomCenterY - centerOffsetY) / 20;
     }
     document.getElementById("centerOffsetYOutput").value = centerOffsetY;
@@ -321,27 +279,24 @@
   }
 
 
-  function resetZoom()
-  {
+  function resetZoom() {
     zoom = 1.0;
     zoomCenterX = parseFloat(document.getElementById("zoomCenterXInput").value);
     zoomCenterY = parseFloat(document.getElementById("zoomCenterYInput").value);
   }
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     resetZoom();
 
     var canvas = document.getElementById("example01-canvas");
     initGL(canvas);
     initShaders()
+    initBuffers();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clearDepth(1.0);
-
-    initBuffers();
 
     setInterval(drawScene, 15);
   }
