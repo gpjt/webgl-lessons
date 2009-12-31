@@ -192,8 +192,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -228,8 +227,7 @@
 
     var texture = gl.createTexture();
     texture.image = new Image();
-    texture.image.onload = function()
-    {
+    texture.image.onload = function() {
       handleLoadedTexture(texture)
     }
 
@@ -458,8 +456,8 @@
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
-    if (lighting)
-    {
+    if (lighting) {
+
       gl.uniform3f(
         gl.getUniformLocation(shaderProgram, "uAmbientColor"),
         parseFloat(document.getElementById("ambientR").value),
