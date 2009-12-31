@@ -694,6 +694,7 @@
     var canvas = document.getElementById("lesson12-canvas");
     initGL(canvas);
     initShaders();
+    initBuffers();
     initTextures();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -702,8 +703,6 @@
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-
-    initBuffers();
 
     setInterval(tick, 15);
   }
