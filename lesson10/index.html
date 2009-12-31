@@ -465,7 +465,7 @@
         xPos -= Math.sin(yaw * piOver180) * speed * elapsed;
         zPos -= Math.cos(yaw * piOver180) * speed * elapsed;
 
-        joggingAngle += elapsed * 0.6;  // 0.6 "fiddle factor" -- makes it feel more realistic :-)
+        joggingAngle += elapsed * 0.6;  // 0.6 "fiddle factor" - makes it feel more realistic :-)
         yPos = Math.sin(joggingAngle * piOver180) / 20 + 0.4
       }
 
