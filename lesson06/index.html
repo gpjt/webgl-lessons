@@ -505,6 +505,7 @@
     var canvas = document.getElementById("lesson06-canvas");
     initGL(canvas);
     initShaders();
+    initBuffers();
     initTexture();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -516,8 +517,6 @@
 
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
-
-    initBuffers();
 
     setInterval(tick, 15);
   }
