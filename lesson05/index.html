@@ -12,8 +12,7 @@
 
   uniform sampler2D uSampler;
 
-  void main(void)
-  {
+  void main(void) {
     gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
   }
 </script>
@@ -28,8 +27,7 @@
   varying vec2 vTextureCoord;
 
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
   }
@@ -46,14 +44,10 @@
   // code in this page uses the new name, but the compatibility
   // code that follows will stay here for the time being to make
   // sure that Firefox users can view the page.
-  try
-  {
+  try {
     WebGLFloatArray;
-  }
-  catch (e)
-  {
-    try
-    {
+  } catch (e) {
+    try {
       WebGLArrayBuffer = CanvasArrayBuffer;
       WebGLByteArray = CanvasByteArray;
       WebGLUnsignedByteArray = CanvasUnsignedByteArray;
@@ -62,9 +56,7 @@
       WebGLIntArray = CanvasIntArray;
       WebGLUnsignedIntArray = CanvasUnsignedIntArray;
       WebGLFloatArray = CanvasFloatArray;
-    }
-    catch (e)
-    {
+    } catch (e) {
       alert("Could not find Canvas array types for WebGL.");
     }
   }
@@ -72,37 +64,24 @@
 
 
   var gl;
-  function initGL(canvas)
-  {
-    try
-    {
+  function initGL(canvas) {
+    try {
       gl = canvas.getContext("experimental-webgl");
+    } catch(e) {
     }
-    catch(e)
-    {
-    }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("webkit-3d");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("moz-webgl");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
+    if (!gl) {
       alert("Could not initialise WebGL, sorry :-(");
     }
 
@@ -113,12 +92,10 @@
     // in the meantime (as, for example, there's no way to get shader
     // or program parameters that are vectors of integers).
     // See http://learningwebgl.com/blog/?p=1082 for details.
-    if (!gl.getProgramParameter)
-    {
+    if (!gl.getProgramParameter) {
       gl.getProgramParameter = gl.getProgrami
     }
-    if (!gl.getShaderParameter)
-    {
+    if (!gl.getShaderParameter) {
       gl.getShaderParameter = gl.getShaderi
     }
     // End of Chrome compatibility code
@@ -126,40 +103,33 @@
   }
 
 
-  function getShader(gl, id)
-  {
+  function getShader(gl, id) {
       var shaderScript = document.getElementById(id);
-      if (!shaderScript)
+      if (!shaderScript) {
           return null;
+      }
 
       var str = "";
       var k = shaderScript.firstChild;
-      while (k)
-      {
+      while (k) {
           if (k.nodeType == 3)
               str += k.textContent;
           k = k.nextSibling;
       }
 
       var shader;
-      if (shaderScript.type == "x-shader/x-fragment")
-      {
+      if (shaderScript.type == "x-shader/x-fragment") {
           shader = gl.createShader(gl.FRAGMENT_SHADER);
-      }
-      else if (shaderScript.type == "x-shader/x-vertex")
-      {
+      } else if (shaderScript.type == "x-shader/x-vertex") {
           shader = gl.createShader(gl.VERTEX_SHADER);
-      }
-      else
-      {
+      } else {
           return null;
       }
 
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-      {
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
           alert(gl.getShaderInfoLog(shader));
           return null;
       }
@@ -167,11 +137,11 @@
       return shader;
   }
 
+
   var shaderProgram;
   var vertexPositionAttribute;
   var textureCoordAttribute;
-  function initShaders()
-  {
+  function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -180,8 +150,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -195,8 +164,7 @@
   }
 
 
-  function handleLoadedTexture(image, texture)
-  {
+  function handleLoadedTexture(image, texture) {
     gl.enable(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, image);
@@ -208,12 +176,10 @@
 
   var neheTexture;
   var neheImage;
-  function initTexture()
-  {
+  function initTexture() {
     neheTexture = gl.createTexture();
     neheImage = new Image();
-    neheImage.onload = function()
-    {
+    neheImage.onload = function() {
       handleLoadedTexture(neheImage, neheTexture)
     }
 
@@ -234,45 +200,40 @@
   }
 
   function mvPopMatrix() {
-    if (mvMatrixStack.length == 0)
+    if (mvMatrixStack.length == 0) {
       throw "Invalid popMatrix!";
+    }
     mvMatrix = mvMatrixStack.pop();
     return mvMatrix;
   }
 
-  function loadIdentity()
-  {
+  function loadIdentity() {
     mvMatrix = Matrix.I(4);
   }
 
 
-  function multMatrix(m)
-  {
+  function multMatrix(m) {
     mvMatrix = mvMatrix.x(m);
   }
 
-  function mvTranslate(v)
-  {
+  function mvTranslate(v) {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
-  function mvRotate(ang, v)
-  {
+  function mvRotate(ang, v) {
     var arad = ang * Math.PI / 180.0;
     var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
   var pMatrix;
-  function perspective(fovy, aspect, znear, zfar)
-  {
+  function perspective(fovy, aspect, znear, zfar) {
     pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
-  function setMatrixUniforms()
-  {
+  function setMatrixUniforms() {
     var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
@@ -284,8 +245,7 @@
   var cubeVertexPositionBuffer;
   var cubeVertexTextureCoordBuffer;
   var cubeVertexIndexBuffer;
-  function initBuffers()
-  {
+  function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     vertices = [
@@ -391,8 +351,7 @@
   var xRot = 0;
   var yRot = 0;
   var zRot = 0;
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
@@ -421,11 +380,9 @@
 
 
   var lastTime = 0;
-  function animate()
-  {
+  function animate() {
     var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
+    if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
       xRot += (90 * elapsed) / 1000.0;
@@ -436,18 +393,17 @@
   }
 
 
-  function tick()
-  {
+  function tick() {
     drawScene();
     animate();
   }
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     var canvas = document.getElementById("lesson05-canvas");
     initGL(canvas);
     initShaders();
+    initBuffers();
     initTexture();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -456,8 +412,6 @@
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-
-    initBuffers();
 
     setInterval(tick, 15);
   }
