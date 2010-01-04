@@ -46,14 +46,10 @@
   // code in this page uses the new name, but the compatibility
   // code that follows will stay here for the time being to make
   // sure that Firefox users can view the page.
-  try
-  {
+  try {
     WebGLFloatArray;
-  }
-  catch (e)
-  {
-    try
-    {
+  } catch (e) {
+    try {
       WebGLArrayBuffer = CanvasArrayBuffer;
       WebGLByteArray = CanvasByteArray;
       WebGLUnsignedByteArray = CanvasUnsignedByteArray;
@@ -62,9 +58,7 @@
       WebGLIntArray = CanvasIntArray;
       WebGLUnsignedIntArray = CanvasUnsignedIntArray;
       WebGLFloatArray = CanvasFloatArray;
-    }
-    catch (e)
-    {
+    } catch (e) {
       alert("Could not find Canvas array types for WebGL.");
     }
   }
@@ -72,37 +66,24 @@
 
 
   var gl;
-  function initGL(canvas)
-  {
-    try
-    {
+  function initGL(canvas) {
+    try {
       gl = canvas.getContext("experimental-webgl");
+    } catch(e) {
     }
-    catch(e)
-    {
-    }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("webkit-3d");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
-      try
-      {
+    if (!gl) {
+      try {
         gl = canvas.getContext("moz-webgl");
-      }
-      catch(e)
-      {
+      } catch(e) {
       }
     }
-    if (!gl)
-    {
+    if (!gl) {
       alert("Could not initialise WebGL, sorry :-(");
     }
 
@@ -113,12 +94,10 @@
     // in the meantime (as, for example, there's no way to get shader
     // or program parameters that are vectors of integers).
     // See http://learningwebgl.com/blog/?p=1082 for details.
-    if (!gl.getProgramParameter)
-    {
+    if (!gl.getProgramParameter) {
       gl.getProgramParameter = gl.getProgrami
     }
-    if (!gl.getShaderParameter)
-    {
+    if (!gl.getShaderParameter) {
       gl.getShaderParameter = gl.getShaderi
     }
     // End of Chrome compatibility code
@@ -126,46 +105,40 @@
   }
 
 
-  function getShader(gl, id)
-  {
+  function getShader(gl, id) {
       var shaderScript = document.getElementById(id);
-      if (!shaderScript)
+      if (!shaderScript) {
           return null;
+      }
 
       var str = "";
       var k = shaderScript.firstChild;
-      while (k)
-      {
+      while (k) {
           if (k.nodeType == 3)
               str += k.textContent;
           k = k.nextSibling;
       }
 
       var shader;
-      if (shaderScript.type == "x-shader/x-fragment")
-      {
+      if (shaderScript.type == "x-shader/x-fragment") {
           shader = gl.createShader(gl.FRAGMENT_SHADER);
-      }
-      else if (shaderScript.type == "x-shader/x-vertex")
-      {
+      } else if (shaderScript.type == "x-shader/x-vertex") {
           shader = gl.createShader(gl.VERTEX_SHADER);
-      }
-      else
-      {
+      } else {
           return null;
       }
 
       gl.shaderSource(shader, str);
       gl.compileShader(shader);
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-      {
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
           alert(gl.getShaderInfoLog(shader));
           return null;
       }
 
       return shader;
   }
+
 
   var shaderProgram;
   var vertexPositionAttribute;
