@@ -13,8 +13,7 @@
 
   uniform sampler2D uSampler;
 
-  void main(void)
-  {
+  void main(void) {
      vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
      gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
@@ -39,17 +38,13 @@
   varying vec2 vTextureCoord;
   varying vec3 vLightWeighting;
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
 
-    if (!uUseLighting)
-    {
+    if (!uUseLighting) {
       vLightWeighting = vec3(1.0, 1.0, 1.0);
-    }
-    else
-    {
+    } else {
       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
       float directionalLightWeighting = max(dot(transformedNormal.xyz, uLightingDirection), 0.0);
       vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
@@ -165,8 +160,7 @@
   var shaderProgram;
   var vertexPositionAttribute;
   var textureCoordAttribute;
-  function initShaders()
-  {
+  function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -175,8 +169,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -193,8 +186,7 @@
   }
 
 
-  function handleLoadedTexture(image, texture)
-  {
+  function handleLoadedTexture(image, texture) {
     gl.enable(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -208,12 +200,10 @@
 
   var mudTexture;
   var mudImage;
-  function initTexture()
-  {
+  function initTexture() {
     mudTexture = gl.createTexture();
     mudImage = new Image();
-    mudImage.onload = function()
-    {
+    mudImage.onload = function() {
       handleLoadedTexture(mudImage, mudTexture)
     }
 
@@ -234,45 +224,40 @@
   }
 
   function mvPopMatrix() {
-    if (mvMatrixStack.length == 0)
+    if (mvMatrixStack.length == 0) {
       throw "Invalid popMatrix!";
+    }
     mvMatrix = mvMatrixStack.pop();
     return mvMatrix;
   }
 
-  function loadIdentity()
-  {
+  function loadIdentity() {
     mvMatrix = Matrix.I(4);
   }
 
 
-  function multMatrix(m)
-  {
+  function multMatrix(m) {
     mvMatrix = mvMatrix.x(m);
   }
 
-  function mvTranslate(v)
-  {
+  function mvTranslate(v) {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
-  function mvRotate(ang, v)
-  {
+  function mvRotate(ang, v) {
     var arad = ang * Math.PI / 180.0;
     var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
   var pMatrix;
-  function perspective(fovy, aspect, znear, zfar)
-  {
+  function perspective(fovy, aspect, znear, zfar) {
     pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
-  function setMatrixUniforms()
-  {
+  function setMatrixUniforms() {
     var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
@@ -289,14 +274,12 @@
 
   var currentlyPressedKeys = Object();
 
-  function handleKeyDown(event)
-  {
+  function handleKeyDown(event) {
     currentlyPressedKeys[event.keyCode] = true;
   }
 
 
-  function handleKeyUp(event)
-  {
+  function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
   }
 
@@ -313,50 +296,34 @@
 
   var speed = 0;
 
-  function handleKeys()
-  {
-    if (currentlyPressedKeys[33])
-    {
+  function handleKeys() {
+    if (currentlyPressedKeys[33]) {
       // Page Up
       pitchRate = 0.1;
-    }
-    else if (currentlyPressedKeys[34])
-    {
+    } else if (currentlyPressedKeys[34]) {
       // Page Down
       pitchRate = -0.1;
-    }
-    else
-    {
+    } else {
       pitchRate = 0;
     }
 
-    if (currentlyPressedKeys[37] || currentlyPressedKeys[65])
-    {
+    if (currentlyPressedKeys[37] || currentlyPressedKeys[65]) {
       // Left cursor key or A
       yawRate = 0.1;
-    }
-    else if (currentlyPressedKeys[39] || currentlyPressedKeys[68])
-    {
+    } else if (currentlyPressedKeys[39] || currentlyPressedKeys[68]) {
       // Right cursor key or D
       yawRate = -0.1;
-    }
-    else
-    {
+    } else {
       yawRate = 0;
     }
 
-    if (currentlyPressedKeys[38] || currentlyPressedKeys[87])
-    {
+    if (currentlyPressedKeys[38] || currentlyPressedKeys[87]) {
       // Up cursor key or W
       speed = 0.003;
-    }
-    else if (currentlyPressedKeys[40] || currentlyPressedKeys[83])
-    {
+    } else if (currentlyPressedKeys[40] || currentlyPressedKeys[83]) {
       // Down cursor key
       speed = -0.003;
-    }
-    else
-    {
+    } else {
       speed = 0;
     }
 
@@ -367,26 +334,20 @@
   var worldVertexPositionBuffer = null;
   var worldVertexTextureCoordBuffer = null;
   var worldVertexNormalBuffer = null;
-  function handleLoadedWorld(data)
-  {
+  function handleLoadedWorld(data) {
     var lines = data.split("\n");
     var vertexCount = 0;
     var vertexPositions = [];
     var vertexTextureCoords = [];
     var vertexNormals = [];
     var currentTriangle = []
-    function addTriangleToLists(triangle, normal, flip)
-    {
-      if (flip)
-      {
+    function addTriangleToLists(triangle, normal, flip) {
+      if (flip) {
         triangle = [triangle[0], triangle[2], triangle[1]];
-      }
-      else
-      {
+      } else {
         normal = normal.x(-1);
       }
-      for (var i in triangle)
-      {
+      for (var i in triangle) {
         vertex = triangle[i];
 
         vertexPositions.push(vertex.position.e(1));
@@ -403,11 +364,9 @@
     }
 
 
-    for (var i in lines)
-    {
+    for (var i in lines) {
       var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
-      if (vals.length == 5 && vals[0] != "//")
-      {
+      if (vals.length == 5 && vals[0] != "//") {
         // It is a line describing a vertex.  Construct an object to
         // represent it:
         vertex = {
@@ -416,8 +375,7 @@
         };
         currentTriangle.push(vertex);
 
-        if (currentTriangle.length == 3)
-        {
+        if (currentTriangle.length == 3) {
           var sideVector1 = currentTriangle[1].position.subtract(currentTriangle[0].position);
           var sideVector2 = currentTriangle[0].position.subtract(currentTriangle[2].position);
           var normal = sideVector1.cross(sideVector2).toUnitVector();
@@ -455,28 +413,23 @@
   }
 
 
-  function loadWorld()
-  {
+  function loadWorld() {
     var request = new XMLHttpRequest();
     request.open("GET", "world.txt");
-    request.onreadystatechange = function()
-      {
-        if (request.readyState == 4)
-        {
-          handleLoadedWorld(request.responseText);
-        }
+    request.onreadystatechange = function() {
+      if (request.readyState == 4) {
+        handleLoadedWorld(request.responseText);
       }
+    }
     request.send();
   }
 
 
 
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    if (worldVertexTextureCoordBuffer == null || worldVertexNormalBuffer == null || worldVertexPositionBuffer == null)
-    {
+    if (worldVertexTextureCoordBuffer == null || worldVertexNormalBuffer == null || worldVertexPositionBuffer == null) {
       return;
     }
 
@@ -490,8 +443,7 @@
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
-    if (lighting)
-    {
+    if (lighting) {
       gl.uniform3f(
         gl.getUniformLocation(shaderProgram, "uAmbientColor"),
         parseFloat(document.getElementById("ambientR").value),
@@ -543,15 +495,12 @@
   var piOver180 = Math.PI / 180;
   // Used to make us "jog" up and down as we move forward.
   var joggingAngle = 0;
-  function animate()
-  {
+  function animate() {
     var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
+    if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
-      if (speed != 0)
-      {
+      if (speed != 0) {
         xPos -= Math.sin(yaw * piOver180) * speed * elapsed;
         zPos -= Math.cos(yaw * piOver180) * speed * elapsed;
 
@@ -567,8 +516,7 @@
   }
 
 
-  function tick()
-  {
+  function tick() {
     handleKeys();
     drawScene();
     animate();
@@ -576,8 +524,7 @@
 
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     var canvas = document.getElementById("lesson10.5-canvas");
     initGL(canvas);
     initShaders();

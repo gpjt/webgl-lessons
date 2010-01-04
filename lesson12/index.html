@@ -13,8 +13,7 @@
 
   uniform sampler2D uSampler;
 
-  void main(void)
-  {
+  void main(void) {
     vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
@@ -39,18 +38,14 @@
   varying vec2 vTextureCoord;
   varying vec3 vLightWeighting;
 
-  void main(void)
-  {
+  void main(void) {
     vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
     gl_Position = uPMatrix * mvPosition;
     vTextureCoord = aTextureCoord;
 
-    if (!uUseLighting)
-    {
+    if (!uUseLighting) {
       vLightWeighting = vec3(1.0, 1.0, 1.0);
-    }
-    else
-    {
+    } else {
       vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 
       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
@@ -169,8 +164,7 @@
   var vertexPositionAttribute;
   var vertexNormalAttribute;
   var textureCoordAttribute;
-  function initShaders()
-  {
+  function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -179,8 +173,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -197,8 +190,7 @@
   }
 
 
-  function handleLoadedTexture(image, texture)
-  {
+  function handleLoadedTexture(image, texture) {
     gl.enable(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -216,12 +208,10 @@
 
   var crateTexture;
   var crateImage;
-  function initTextures()
-  {
+  function initTextures() {
     moonTexture = gl.createTexture();
     moonImage = new Image();
-    moonImage.onload = function()
-    {
+    moonImage.onload = function() {
       handleLoadedTexture(moonImage, moonTexture)
     }
 
@@ -229,8 +219,7 @@
 
     crateTexture = gl.createTexture();
     crateImage = new Image();
-    crateImage.onload = function()
-    {
+    crateImage.onload = function() {
       handleLoadedTexture(crateImage, crateTexture)
     }
 
@@ -241,70 +230,57 @@
   var mvMatrix;
   var mvMatrixStack = [];
 
-  function mvPushMatrix(m)
-  {
-    if (m)
-    {
+  function mvPushMatrix(m) {
+    if (m) {
       mvMatrixStack.push(m.dup());
       mvMatrix = m.dup();
-    }
-    else
-    {
+    } else {
       mvMatrixStack.push(mvMatrix.dup());
     }
   }
 
-  function mvPopMatrix()
-  {
-    if (mvMatrixStack.length == 0)
-    {
+  function mvPopMatrix() {
+    if (mvMatrixStack.length == 0) {
       throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();
     return mvMatrix;
   }
 
-  function loadIdentity()
-  {
+  function loadIdentity() {
     mvMatrix = Matrix.I(4);
   }
 
 
-  function multMatrix(m)
-  {
+  function multMatrix(m) {
     mvMatrix = mvMatrix.x(m);
   }
 
 
-  function mvTranslate(v)
-  {
+  function mvTranslate(v) {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
 
-  function createRotationMatrix(angle, v)
-  {
+  function createRotationMatrix(angle, v) {
     var arad = angle * Math.PI / 180.0;
     return Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
   }
 
 
-  function mvRotate(angle, v)
-  {
+  function mvRotate(angle, v) {
     multMatrix(createRotationMatrix(angle, v));
   }
 
 
   var pMatrix;
-  function perspective(fovy, aspect, znear, zfar)
-  {
+  function perspective(fovy, aspect, znear, zfar) {
     pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
-  function setMatrixUniforms()
-  {
+  function setMatrixUniforms() {
     var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
@@ -327,8 +303,7 @@
   var moonVertexNormalBuffer;
   var moonVertexTextureCoordBuffer;
   var moonVertexIndexBuffer;
-  function initBuffers()
-  {
+  function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     vertices = [
@@ -480,14 +455,12 @@
     var vertexPositionData = [];
     var normalData = [];
     var textureCoordData = [];
-    for (var latNumber = 0; latNumber <= latitudeBands; latNumber++)
-    {
+    for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
       var theta = latNumber * Math.PI / latitudeBands;
       var sinTheta = Math.sin(theta);
       var cosTheta = Math.cos(theta);
 
-      for (var longNumber = 0; longNumber <= longitudeBands; longNumber++)
-      {
+      for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
         var phi = longNumber * 2 * Math.PI / longitudeBands;
         var sinPhi = Math.sin(phi);
         var cosPhi = Math.cos(phi);
@@ -512,20 +485,18 @@
 
     var indexData = [];
     longitudeBands += 1;
-    for (var latNumber = 0; latNumber < latitudeBands; latNumber++)
-    {
-        for (var longNumber = 0; longNumber < longitudeBands; longNumber++)
-        {
-            var first = (latNumber * longitudeBands) + (longNumber % longitudeBands);
-            var second = first + longitudeBands;
-            indexData.push(first);
-            indexData.push(second);
-            indexData.push(first + 1);
+    for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
+      for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
+        var first = (latNumber * longitudeBands) + (longNumber % longitudeBands);
+        var second = first + longitudeBands;
+        indexData.push(first);
+        indexData.push(second);
+        indexData.push(first + 1);
 
-            indexData.push(second);
-            indexData.push(second + 1);
-            indexData.push(first + 1);
-        }
+        indexData.push(second);
+        indexData.push(second + 1);
+        indexData.push(first + 1);
+      }
     }
 
     moonVertexNormalBuffer = gl.createBuffer();
@@ -557,16 +528,14 @@
   var moonAngle = 180;
   var cubeAngle = 0;
 
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
-    if (lighting)
-    {
+    if (lighting) {
       gl.uniform3f(
         gl.getUniformLocation(shaderProgram, "uAmbientColor"),
         parseFloat(document.getElementById("ambientR").value),
@@ -640,11 +609,9 @@
 
 
   var lastTime = 0;
-  function animate()
-  {
+  function animate() {
     var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
+    if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
       moonAngle += 0.05 * elapsed;
@@ -655,15 +622,13 @@
 
 
 
-  function tick()
-  {
+  function tick() {
     drawScene();
     animate();
   }
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     var canvas = document.getElementById("lesson12-canvas");
     initGL(canvas);
     initShaders();

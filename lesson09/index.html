@@ -14,8 +14,7 @@
 
   uniform vec3 uColor;
 
-  void main(void)
-  {
+  void main(void) {
     vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
     gl_FragColor = textureColor * vec4(uColor, 1.0);
   }
@@ -30,8 +29,7 @@
 
   varying vec2 vTextureCoord;
 
-  void main(void)
-  {
+  void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
   }
@@ -145,8 +143,7 @@
   var shaderProgram;
   var vertexPositionAttribute;
   var textureCoordAttribute;
-  function initShaders()
-  {
+  function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -155,8 +152,7 @@
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
-    {
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
@@ -170,8 +166,7 @@
   }
 
 
-  function handleLoadedTexture(image, texture)
-  {
+  function handleLoadedTexture(image, texture) {
     gl.enable(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -185,12 +180,10 @@
 
   var starTexture;
   var starImage;
-  function initTexture()
-  {
+  function initTexture() {
     starTexture = gl.createTexture();
     starImage = new Image();
-    starImage.onload = function()
-    {
+    starImage.onload = function() {
       handleLoadedTexture(starImage, starTexture)
     }
 
@@ -211,45 +204,40 @@
   }
 
   function mvPopMatrix() {
-    if (mvMatrixStack.length == 0)
+    if (mvMatrixStack.length == 0) {
       throw "Invalid popMatrix!";
+    }
     mvMatrix = mvMatrixStack.pop();
     return mvMatrix;
   }
 
-  function loadIdentity()
-  {
+  function loadIdentity() {
     mvMatrix = Matrix.I(4);
   }
 
 
-  function multMatrix(m)
-  {
+  function multMatrix(m) {
     mvMatrix = mvMatrix.x(m);
   }
 
-  function mvTranslate(v)
-  {
+  function mvTranslate(v) {
     var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
-  function mvRotate(ang, v)
-  {
+  function mvRotate(ang, v) {
     var arad = ang * Math.PI / 180.0;
     var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
     multMatrix(m);
   }
 
   var pMatrix;
-  function perspective(fovy, aspect, znear, zfar)
-  {
+  function perspective(fovy, aspect, znear, zfar) {
     pMatrix = makePerspective(fovy, aspect, znear, zfar)
   }
 
 
-  function setMatrixUniforms()
-  {
+  function setMatrixUniforms() {
     var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
@@ -261,14 +249,12 @@
 
   var currentlyPressedKeys = Object();
 
-  function handleKeyDown(event)
-  {
+  function handleKeyDown(event) {
     currentlyPressedKeys[event.keyCode] = true;
   }
 
 
-  function handleKeyUp(event)
-  {
+  function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
   }
 
@@ -280,25 +266,20 @@
   var spin = 0;
 
 
-  function handleKeys()
-  {
-    if (currentlyPressedKeys[33])
-    {
+  function handleKeys() {
+    if (currentlyPressedKeys[33]) {
       // Page Up
       zoom += 0.1;
     }
-    if (currentlyPressedKeys[34])
-    {
+    if (currentlyPressedKeys[34]) {
       // Page Down
       zoom -= 0.1;
     }
-    if (currentlyPressedKeys[38])
-    {
+    if (currentlyPressedKeys[38]) {
       // Up cursor key
       tilt += 2;
     }
-    if (currentlyPressedKeys[40])
-    {
+    if (currentlyPressedKeys[40]) {
       // Down cursor key
       tilt -= 2;
     }
@@ -307,8 +288,7 @@
 
   var starVertexPositionBuffer;
   var starVertexTextureCoordBuffer;
-  function initBuffers()
-  {
+  function initBuffers() {
     starVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, starVertexPositionBuffer);
     vertices = [
@@ -335,8 +315,7 @@
   }
 
 
-  function drawStar()
-  {
+  function drawStar() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, starTexture);
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
@@ -353,73 +332,67 @@
 
 
 
-  function Star(startingDistance, rotationSpeed)
-  {
+  function Star(startingDistance, rotationSpeed) {
     this.angle = 0;
     this.dist = startingDistance;
     this.rotationSpeed = rotationSpeed;
 
-    this.draw = function(tilt, spin, twinkle)
-      {
-        mvPushMatrix();
+    this.draw = function(tilt, spin, twinkle) {
+      mvPushMatrix();
 
-        // Move to the star's position
-        mvRotate(this.angle, [0.0, 1.0, 0.0]);
-        mvTranslate([this.dist, 0.0, 0.0]);
+      // Move to the star's position
+      mvRotate(this.angle, [0.0, 1.0, 0.0]);
+      mvTranslate([this.dist, 0.0, 0.0]);
 
-        // Rotate back so that the star is facing the viewer
-        mvRotate(-this.angle, [0.0, 1.0, 0.0]);
-        mvRotate(-tilt, [1.0, 0.0, 0.0]);
+      // Rotate back so that the star is facing the viewer
+      mvRotate(-this.angle, [0.0, 1.0, 0.0]);
+      mvRotate(-tilt, [1.0, 0.0, 0.0]);
 
-        if (twinkle)
-        {
-          // Draw a non-rotating star in the alternate "twinkling" color
-          gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.twinkleR, this.twinkleG, this.twinkleB);
-          drawStar();
-        }
+      if (twinkle) {
+        // Draw a non-rotating star in the alternate "twinkling" color
+        gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.twinkleR, this.twinkleG, this.twinkleB);
+        drawStar();
+      }
 
-        // All stars spin around the Z axis at the same rate
-        mvRotate(spin, [0.0, 0.0, 1.0]);
+      // All stars spin around the Z axis at the same rate
+      mvRotate(spin, [0.0, 0.0, 1.0]);
 
-        // Draw the star in its main color
-        gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
-        drawStar()
+      // Draw the star in its main color
+      gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
+      drawStar()
 
-        mvPopMatrix();
-      };
+      mvPopMatrix();
+    };
 
-    this.animate = function(elapsedTime)
-      {
-        var effectiveFPMS = 60 / 1000;
-        this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
+    this.animate = function(elapsedTime) {
+      var effectiveFPMS = 60 / 1000;
+      this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
 
-        // Decrease the distance, resetting the star to the outside of
-        // the spiral if it's at the center.
-        this.dist -= 0.01 * effectiveFPMS * elapsedTime;
-        if (this.dist < 0.0)
-        {
-          this.dist += 5.0;
-          this.randomiseColors();
-        }
+      // Decrease the distance, resetting the star to the outside of
+      // the spiral if it's at the center.
+      this.dist -= 0.01 * effectiveFPMS * elapsedTime;
+      if (this.dist < 0.0) {
+        this.dist += 5.0;
+        this.randomiseColors();
+      }
 
-      };
+    };
 
 
-    this.randomiseColors = function()
-      {
-        // Give the star a random color for normal
-        // circumstances...
-        this.r = Math.random();
-        this.g = Math.random();
-        this.b = Math.random();
+    this.randomiseColors = function() {
+      // Give the star a random color for normal
+      // circumstances...
+      this.r = Math.random();
+      this.g = Math.random();
+      this.b = Math.random();
 
-        // When the star is twinkling, we draw it twice, once
-        // in the color below (not spinning) and then once in the
-        // main color defined above.
-        this.twinkleR = Math.random();
-        this.twinkleG = Math.random();
-        this.twinkleB = Math.random();
-      };
+      // When the star is twinkling, we draw it twice, once
+      // in the color below (not spinning) and then once in the
+      // main color defined above.
+      this.twinkleR = Math.random();
+      this.twinkleG = Math.random();
+      this.twinkleB = Math.random();
+    };
 
     // Set the colors to a starting value.
     this.randomiseColors();
@@ -428,20 +401,17 @@
 
 
   var stars = [];
-  function initWorldObjects()
-  {
+  function initWorldObjects() {
     var numStars = 50;
 
     var distances = []
-    for (var i=0; i < numStars; i++)
-    {
+    for (var i=0; i < numStars; i++) {
       stars.push(new Star((i / numStars) * 5.0, i / numStars));
     }
   }
 
 
-  function drawScene()
-  {
+  function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
@@ -454,8 +424,7 @@
     mvRotate(tilt, [1.0, 0.0, 0.0]);
 
     var twinkle = document.getElementById("twinkle").checked;
-    for (var i in stars)
-    {
+    for (var i in stars) {
       stars[i].draw(tilt, spin, twinkle);
       spin += 0.1;
     }
@@ -464,15 +433,12 @@
 
 
   var lastTime = 0;
-  function animate()
-  {
+  function animate() {
     var timeNow = new Date().getTime();
-    if (lastTime != 0)
-    {
+    if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
-      for (var i in stars)
-      {
+      for (var i in stars) {
         stars[i].animate(elapsed);
       }
     }
@@ -481,8 +447,7 @@
   }
 
 
-  function tick()
-  {
+  function tick() {
     handleKeys();
     drawScene();
     animate();
@@ -490,8 +455,7 @@
 
 
 
-  function webGLStart()
-  {
+  function webGLStart() {
     var canvas = document.getElementById("lesson09-canvas");
     initGL(canvas);
     initShaders();
