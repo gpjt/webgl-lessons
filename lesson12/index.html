@@ -469,7 +469,7 @@
         var x = cosPhi * sinTheta;
         var y = cosTheta;
         var z = sinPhi * sinTheta;
-        var u = 1- (longNumber / longitudeBands);
+        var u = 1 - (longNumber / longitudeBands);
         var v = latNumber / latitudeBands;
 
         normalData.push(x);
@@ -483,13 +483,11 @@
       }
     }
 
-
     var indexData = [];
-    longitudeBands += 1;
     for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
       for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
-        var first = (latNumber * longitudeBands) + (longNumber % longitudeBands);
-        var second = first + longitudeBands;
+        var first = (latNumber * (longitudeBands + 1)) + longNumber;
+        var second = first + longitudeBands + 1;
         indexData.push(first);
         indexData.push(second);
         indexData.push(first + 1);
