@@ -36,7 +36,7 @@
 </script>
 
 
-<script type="application/x-javascript">
+<script type="text/javascript">
 
   // This code is for Firefox/Minefield compatibility.  WebGL
   // originally used a class called CanvasFloatArray, but the
@@ -234,7 +234,7 @@
 
   var pMatrix;
   function perspective(fovy, aspect, znear, zfar) {
-    pMatrix = makePerspective(fovy, aspect, znear, zfar)
+    pMatrix = makePerspective(fovy, aspect, znear, zfar);
   }
 
 
@@ -482,7 +482,7 @@
 </head>
 
 
-<body onload="webGLStart()">
+<body onload="webGLStart();">
 <a href="http://learningwebgl.com/blog/?p=1008">&lt;&lt; Back to Lesson 9</a><br />
 
   <canvas id="lesson09-canvas" style="border: none;" width="500" height="500"></canvas>
