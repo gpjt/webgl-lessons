@@ -111,8 +111,6 @@
 
 
   function handleLoadedTexture(image, textures) {
-    gl.enable(gl.TEXTURE_2D);
-
     gl.bindTexture(gl.TEXTURE_2D, textures[0]);
     gl.texImage2D(gl.TEXTURE_2D, 0, image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
