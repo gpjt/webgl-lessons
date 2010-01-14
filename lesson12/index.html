@@ -14,7 +14,7 @@
   uniform sampler2D uSampler;
 
   void main(void) {
-    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, 1 - vTextureCoord.t));
     gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
   }
 </script>
@@ -138,7 +138,7 @@
 
   function handleLoadedTexture(image, texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, image, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);
