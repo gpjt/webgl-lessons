@@ -13,6 +13,7 @@
   varying vec4 vPosition;
 
   uniform bool uUseLighting;
+  uniform bool uUseTextures;
 
   uniform vec3 uAmbientColor;
 
@@ -33,8 +34,13 @@
       lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
 
-    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-    gl_FragColor = vec4(textureColor.rgb * lightWeighting, textureColor.a);
+    vec4 fragmentColor;
+    if (uUseTextures) {
+      fragmentColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    } else {
+      fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    gl_FragColor = vec4(fragmentColor.rgb * lightWeighting, fragmentColor.a);
   }
 </script>
 
@@ -507,6 +513,9 @@
       );
     }
 
+    var textures = document.getElementById("textures").checked;
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseTextures"), textures);
+
     loadIdentity();
 
     mvTranslate([0, 0, -8]);
@@ -610,6 +619,7 @@
 
   <br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
+<input type="checkbox" id="textures" checked /> Use textures<br/>
 
 <br/>
 <h2>Point light:</h2>
