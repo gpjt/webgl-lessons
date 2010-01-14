@@ -7,7 +7,7 @@
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
 
-<script id="shader-fs" type="x-shader/x-fragment">
+<script id="per-fragment-shader-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
   varying vec4 vTransformedNormal;
   varying vec4 vPosition;
@@ -44,7 +44,7 @@
   }
 </script>
 
-<script id="shader-vs" type="x-shader/x-vertex">
+<script id="per-fragment-shader-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
@@ -117,33 +117,31 @@
   }
 
 
-  var shaderProgram;
-  var vertexPositionAttribute;
-  var vertexNormalAttribute;
-  var textureCoordAttribute;
+  var currentProgram;
+  var perFragmentProgram;
   function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
+    var fragmentShader = getShader(gl, "per-fragment-shader-fs");
+    var vertexShader = getShader(gl, "per-fragment-shader-vs");
 
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+    perFragmentProgram = gl.createProgram();
+    gl.attachShader(perFragmentProgram, vertexShader);
+    gl.attachShader(perFragmentProgram, fragmentShader);
+    gl.linkProgram(perFragmentProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(perFragmentProgram, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
-    gl.useProgram(shaderProgram);
+    perFragmentProgram.vertexPositionAttribute = gl.getAttribLocation(perFragmentProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(perFragmentProgram.vertexPositionAttribute);
 
-    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(vertexPositionAttribute);
+    perFragmentProgram.vertexNormalAttribute = gl.getAttribLocation(perFragmentProgram, "aVertexNormal");
+    gl.enableVertexAttribArray(perFragmentProgram.vertexNormalAttribute);
 
-    vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-    gl.enableVertexAttribArray(vertexNormalAttribute);
+    perFragmentProgram.textureCoordAttribute = gl.getAttribLocation(perFragmentProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(perFragmentProgram.textureCoordAttribute);
 
-    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(textureCoordAttribute);
+    currentProgram = perFragmentProgram;
   }
 
 
@@ -238,15 +236,15 @@
 
 
   function setMatrixUniforms() {
-    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    var pUniform = gl.getUniformLocation(currentProgram, "uPMatrix");
     gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
 
-    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    var mvUniform = gl.getUniformLocation(currentProgram, "uMVMatrix");
     gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
 
     var normalMatrix = mvMatrix.inverse();
     normalMatrix = normalMatrix.transpose();
-    var nUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    var nUniform = gl.getUniformLocation(currentProgram, "uNMatrix");
     gl.uniformMatrix4fv(nUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
   }
 
@@ -488,25 +486,33 @@
 
     perspective(45, 1.0, 0.1, 100.0);
 
+    var perFragmentLighting = document.getElementById("per-fragment").checked;
+    if (perFragmentLighting) {
+      currentProgram = perFragmentProgram;
+    } else {
+      currentProgram = perFragmentProgram;
+    }
+    gl.useProgram(currentProgram);
+
     var lighting = document.getElementById("lighting").checked;
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseLighting"), lighting);
+    gl.uniform1i(gl.getUniformLocation(currentProgram, "uUseLighting"), lighting);
     if (lighting) {
       gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uAmbientColor"),
+        gl.getUniformLocation(currentProgram, "uAmbientColor"),
         parseFloat(document.getElementById("ambientR").value),
         parseFloat(document.getElementById("ambientG").value),
         parseFloat(document.getElementById("ambientB").value)
       );
 
       gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uPointLightingLocation"),
+        gl.getUniformLocation(currentProgram, "uPointLightingLocation"),
         parseFloat(document.getElementById("lightPositionX").value),
         parseFloat(document.getElementById("lightPositionY").value),
         parseFloat(document.getElementById("lightPositionZ").value)
       );
 
       gl.uniform3f(
-        gl.getUniformLocation(shaderProgram, "uPointLightingColor"),
+        gl.getUniformLocation(currentProgram, "uPointLightingColor"),
         parseFloat(document.getElementById("pointR").value),
         parseFloat(document.getElementById("pointG").value),
         parseFloat(document.getElementById("pointB").value)
@@ -514,7 +520,7 @@
     }
 
     var textures = document.getElementById("textures").checked;
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uUseTextures"), textures);
+    gl.uniform1i(gl.getUniformLocation(currentProgram, "uUseTextures"), textures);
 
     loadIdentity();
 
@@ -527,16 +533,16 @@
     mvTranslate([1.25, 0, 0]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(gl.getUniformLocation(currentProgram, "uSampler"), 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
-    gl.vertexAttribPointer(vertexPositionAttribute, moonVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, moonVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(textureCoordAttribute, moonVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.textureCoordAttribute, moonVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexNormalBuffer);
-    gl.vertexAttribPointer(vertexNormalAttribute, moonVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.vertexNormalAttribute, moonVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, moonVertexIndexBuffer);
     setMatrixUniforms();
@@ -548,17 +554,17 @@
     mvRotate(cubeAngle, [0, 1, 0]);
     mvTranslate([1.25, 0, 0]);
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-    gl.vertexAttribPointer(vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-    gl.vertexAttribPointer(vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(currentProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(gl.getUniformLocation(currentProgram, "uSampler"), 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
@@ -619,6 +625,7 @@
 
   <br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
+<input type="checkbox" id="per-fragment" checked /> Per-fragment lighting<br/>
 <input type="checkbox" id="textures" checked /> Use textures<br/>
 
 <br/>
