@@ -7,6 +7,62 @@
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
 
+<script id="per-vertex-shader-fs" type="x-shader/x-fragment">
+  varying vec2 vTextureCoord;
+  varying vec3 vLightWeighting;
+
+  uniform bool uUseTextures;
+
+  uniform sampler2D uSampler;
+
+  void main(void) {
+    vec4 fragmentColor;
+    if (uUseTextures) {
+      fragmentColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    } else {
+      fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    gl_FragColor = vec4(fragmentColor.rgb * vLightWeighting, fragmentColor.a);
+  }
+</script>
+
+<script id="per-vertex-shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  attribute vec2 aTextureCoord;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+  uniform mat4 uNMatrix;
+
+  uniform vec3 uAmbientColor;
+
+  uniform vec3 uPointLightingLocation;
+  uniform vec3 uPointLightingColor;
+
+  uniform bool uUseLighting;
+
+  varying vec2 vTextureCoord;
+  varying vec3 vLightWeighting;
+
+  void main(void) {
+    vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+    gl_Position = uPMatrix * mvPosition;
+    vTextureCoord = aTextureCoord;
+
+    if (!uUseLighting) {
+      vLightWeighting = vec3(1.0, 1.0, 1.0);
+    } else {
+      vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+
+      vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
+      float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);
+      vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+    }
+  }
+</script>
+
+
 <script id="per-fragment-shader-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
   varying vec4 vTransformedNormal;
@@ -117,31 +173,39 @@
   }
 
 
-  var currentProgram;
-  var perFragmentProgram;
-  function initShaders() {
-    var fragmentShader = getShader(gl, "per-fragment-shader-fs");
-    var vertexShader = getShader(gl, "per-fragment-shader-vs");
 
-    perFragmentProgram = gl.createProgram();
-    gl.attachShader(perFragmentProgram, vertexShader);
-    gl.attachShader(perFragmentProgram, fragmentShader);
-    gl.linkProgram(perFragmentProgram);
+  function createProgram(fragmentShaderID, vertexShaderID) {
+    var fragmentShader = getShader(gl, fragmentShaderID);
+    var vertexShader = getShader(gl, vertexShaderID);
 
-    if (!gl.getProgramParameter(perFragmentProgram, gl.LINK_STATUS)) {
+    var program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
-    perFragmentProgram.vertexPositionAttribute = gl.getAttribLocation(perFragmentProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(perFragmentProgram.vertexPositionAttribute);
+    program.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+    gl.enableVertexAttribArray(program.vertexPositionAttribute);
 
-    perFragmentProgram.vertexNormalAttribute = gl.getAttribLocation(perFragmentProgram, "aVertexNormal");
-    gl.enableVertexAttribArray(perFragmentProgram.vertexNormalAttribute);
+    program.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
+    gl.enableVertexAttribArray(program.vertexNormalAttribute);
 
-    perFragmentProgram.textureCoordAttribute = gl.getAttribLocation(perFragmentProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(perFragmentProgram.textureCoordAttribute);
+    program.textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
+    gl.enableVertexAttribArray(program.textureCoordAttribute);
 
-    currentProgram = perFragmentProgram;
+    return program;
+  }
+
+
+  var currentProgram;
+  var perVertexProgram;
+  var perFragmentProgram;
+  function initShaders() {
+    perVertexProgram = createProgram("per-vertex-shader-fs", "per-vertex-shader-vs");
+    perFragmentProgram = createProgram("per-fragment-shader-fs", "per-fragment-shader-vs");
   }
 
 
@@ -490,7 +554,7 @@
     if (perFragmentLighting) {
       currentProgram = perFragmentProgram;
     } else {
-      currentProgram = perFragmentProgram;
+      currentProgram = perVertexProgram;
     }
     gl.useProgram(currentProgram);
 
@@ -524,13 +588,13 @@
 
     loadIdentity();
 
-    mvTranslate([0, 0, -8]);
-    mvRotate(20, [1, 0, 0]);
+    mvTranslate([0, 0, -5]);
+    mvRotate(30, [1, 0, 0]);
 
 
     mvPushMatrix();
     mvRotate(moonAngle, [0, 1, 0]);
-    mvTranslate([1.25, 0, 0]);
+    mvTranslate([2, 0, 0]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
     gl.uniform1i(gl.getUniformLocation(currentProgram, "uSampler"), 0);
@@ -579,8 +643,8 @@
     if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
-      moonAngle += 0.15 * elapsed;
-      cubeAngle += 0.15 * elapsed;
+      moonAngle += 0.05 * elapsed;
+      cubeAngle += 0.05 * elapsed;
     }
     lastTime = timeNow;
   }
@@ -636,7 +700,7 @@
 <td><b>Location:</b>
 <td>X: <input type="text" id="lightPositionX" value="0.0" />
 <td>Y: <input type="text" id="lightPositionY" value="0.0" />
-<td>Z: <input type="text" id="lightPositionZ" value="-8.0" />
+<td>Z: <input type="text" id="lightPositionZ" value="-5.0" />
 </tr>
 <tr>
 <td><b>Colour:</b>
