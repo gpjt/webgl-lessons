@@ -196,6 +196,16 @@
     program.textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
     gl.enableVertexAttribArray(program.textureCoordAttribute);
 
+    program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
+    program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
+    program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
+    program.samplerUniform = gl.getUniformLocation(program, "uSampler");
+    program.useTexturesUniform = gl.getUniformLocation(program, "uUseTextures");
+    program.useLightingUniform = gl.getUniformLocation(program, "uUseLighting");
+    program.ambientColorUniform = gl.getUniformLocation(program, "uAmbientColor");
+    program.pointLightingLocationUniform = gl.getUniformLocation(program, "uPointLightingLocation");
+    program.pointLightingColorUniform = gl.getUniformLocation(program, "uPointLightingColor");
+
     return program;
   }
 
@@ -298,16 +308,12 @@
 
 
   function setMatrixUniforms() {
-    var pUniform = gl.getUniformLocation(currentProgram, "uPMatrix");
-    gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-
-    var mvUniform = gl.getUniformLocation(currentProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
 
     var normalMatrix = mvMatrix.inverse();
     normalMatrix = normalMatrix.transpose();
-    var nUniform = gl.getUniformLocation(currentProgram, "uNMatrix");
-    gl.uniformMatrix4fv(nUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.nMatrixUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
   }
 
 
@@ -557,24 +563,24 @@
     gl.useProgram(currentProgram);
 
     var lighting = document.getElementById("lighting").checked;
-    gl.uniform1i(gl.getUniformLocation(currentProgram, "uUseLighting"), lighting);
+    gl.uniform1i(currentProgram.useLightingUniform, lighting);
     if (lighting) {
       gl.uniform3f(
-        gl.getUniformLocation(currentProgram, "uAmbientColor"),
+        currentProgram.ambientColorUniform,
         parseFloat(document.getElementById("ambientR").value),
         parseFloat(document.getElementById("ambientG").value),
         parseFloat(document.getElementById("ambientB").value)
       );
 
       gl.uniform3f(
-        gl.getUniformLocation(currentProgram, "uPointLightingLocation"),
+        currentProgram.pointLightingLocationUniform,
         parseFloat(document.getElementById("lightPositionX").value),
         parseFloat(document.getElementById("lightPositionY").value),
         parseFloat(document.getElementById("lightPositionZ").value)
       );
 
       gl.uniform3f(
-        gl.getUniformLocation(currentProgram, "uPointLightingColor"),
+        currentProgram.pointLightingColorUniform,
         parseFloat(document.getElementById("pointR").value),
         parseFloat(document.getElementById("pointG").value),
         parseFloat(document.getElementById("pointB").value)
@@ -582,7 +588,7 @@
     }
 
     var textures = document.getElementById("textures").checked;
-    gl.uniform1i(gl.getUniformLocation(currentProgram, "uUseTextures"), textures);
+    gl.uniform1i(currentProgram.useTexturesUniform, textures);
 
     loadIdentity();
 
@@ -595,7 +601,7 @@
     mvTranslate([2, 0, 0]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
-    gl.uniform1i(gl.getUniformLocation(currentProgram, "uSampler"), 0);
+    gl.uniform1i(currentProgram.samplerUniform, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
     gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, moonVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -626,7 +632,7 @@
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
-    gl.uniform1i(gl.getUniformLocation(currentProgram, "uSampler"), 0);
+    gl.uniform1i(currentProgram.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
