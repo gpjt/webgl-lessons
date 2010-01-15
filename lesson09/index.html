@@ -87,8 +87,6 @@
 
 
   var shaderProgram;
-  var vertexPositionAttribute;
-  var textureCoordAttribute;
   function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
@@ -104,11 +102,16 @@
 
     gl.useProgram(shaderProgram);
 
-    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(vertexPositionAttribute);
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-    textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(textureCoordAttribute);
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+    shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "uColor");
   }
 
 
@@ -182,13 +185,9 @@
 
 
   function setMatrixUniforms() {
-    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-
-    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
   }
-
 
 
   var currentlyPressedKeys = Object();
@@ -262,13 +261,13 @@
   function drawStar() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, starTexture);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, starVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(textureCoordAttribute, starVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, starVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, starVertexPositionBuffer);
-    gl.vertexAttribPointer(vertexPositionAttribute, starVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, starVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, starVertexPositionBuffer.numItems);
@@ -294,7 +293,7 @@
 
       if (twinkle) {
         // Draw a non-rotating star in the alternate "twinkling" color
-        gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.twinkleR, this.twinkleG, this.twinkleB);
+        gl.uniform3f(shaderProgram.colorUniform, this.twinkleR, this.twinkleG, this.twinkleB);
         drawStar();
       }
 
@@ -302,7 +301,7 @@
       mvRotate(spin, [0.0, 0.0, 1.0]);
 
       // Draw the star in its main color
-      gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"), this.r, this.g, this.b);
+      gl.uniform3f(shaderProgram.colorUniform, this.r, this.g, this.b);
       drawStar()
 
       mvPopMatrix();
