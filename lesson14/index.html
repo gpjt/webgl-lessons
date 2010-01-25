@@ -34,7 +34,7 @@
       vec3 eyeDirection = normalize(-vPosition.xyz);
       vec3 reflectionDirection = normalize(-reflect(lightDirection, vTransformedNormal.xyz));
 
-      float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 10);
+      float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 10.0);
       specularLightWeighting = clamp(specularLightWeighting, 0.0, 1.0);
       float diffuseLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
       lightWeighting = uAmbientColor
