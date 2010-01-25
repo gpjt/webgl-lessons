@@ -7,7 +7,7 @@
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
 
-<script id="per-vertex-shader-fs" type="x-shader/x-fragment">
+<script id="per-vertex-lighting-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
   varying vec3 vLightWeighting;
 
@@ -26,7 +26,7 @@
   }
 </script>
 
-<script id="per-vertex-shader-vs" type="x-shader/x-vertex">
+<script id="per-vertex-lighting-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
@@ -63,7 +63,7 @@
 </script>
 
 
-<script id="per-fragment-shader-fs" type="x-shader/x-fragment">
+<script id="per-fragment-lighting-fs" type="x-shader/x-fragment">
   varying vec2 vTextureCoord;
   varying vec4 vTransformedNormal;
   varying vec4 vPosition;
@@ -100,7 +100,7 @@
   }
 </script>
 
-<script id="per-fragment-shader-vs" type="x-shader/x-vertex">
+<script id="per-fragment-lighting-vs" type="x-shader/x-vertex">
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
@@ -214,8 +214,8 @@
   var perVertexProgram;
   var perFragmentProgram;
   function initShaders() {
-    perVertexProgram = createProgram("per-vertex-shader-fs", "per-vertex-shader-vs");
-    perFragmentProgram = createProgram("per-fragment-shader-fs", "per-fragment-shader-vs");
+    perVertexProgram = createProgram("per-vertex-lighting-fs", "per-vertex-lighting-vs");
+    perFragmentProgram = createProgram("per-fragment-lighting-fs", "per-fragment-lighting-vs");
   }
 
 
