@@ -19,7 +19,7 @@
   uniform vec3 uAmbientColor;
 
   uniform vec3 uPointLightingLocation;
-  uniform vec3 uPointLightingColor;
+  uniform vec3 uPointLightingDiffuseColor;
 
   uniform sampler2D uSampler;
 
@@ -32,7 +32,7 @@
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
 
       float directionalLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
-      lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+      lightWeighting = uAmbientColor + uPointLightingDiffuseColor * directionalLightWeighting;
     }
 
     vec4 fragmentColor;
@@ -151,7 +151,7 @@
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
     shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
-    shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
+    shaderProgram.pointLightingDiffuseColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingDiffuseColor");
   }
 
 
@@ -347,10 +347,10 @@
       );
 
       gl.uniform3f(
-        shaderProgram.pointLightingColorUniform,
-        parseFloat(document.getElementById("pointR").value),
-        parseFloat(document.getElementById("pointG").value),
-        parseFloat(document.getElementById("pointB").value)
+        shaderProgram.pointLightingDiffuseColorUniform,
+        parseFloat(document.getElementById("diffuseR").value),
+        parseFloat(document.getElementById("diffuseG").value),
+        parseFloat(document.getElementById("diffuseB").value)
       );
     }
 
@@ -447,10 +447,16 @@
 <td>Z: <input type="text" id="lightPositionZ" value="4.0" />
 </tr>
 <tr>
-<td><b>Colour:</b>
-<td>R: <input type="text" id="pointR" value="0.8" />
-<td>G: <input type="text" id="pointG" value="0.8" />
-<td>B: <input type="text" id="pointB" value="0.8" />
+<td><b>Specular colour:</b>
+<td>R: <input type="text" id="specularR" value="0.8" />
+<td>G: <input type="text" id="specularG" value="0.8" />
+<td>B: <input type="text" id="specularB" value="0.8" />
+</tr>
+<tr>
+<td><b>Diffuse colour:</b>
+<td>R: <input type="text" id="diffuseR" value="0.8" />
+<td>G: <input type="text" id="diffuseG" value="0.8" />
+<td>B: <input type="text" id="diffuseB" value="0.8" />
 </tr>
 </table>
 
