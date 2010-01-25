@@ -13,6 +13,8 @@
   varying vec4 vTransformedNormal;
   varying vec4 vPosition;
 
+  uniform float uMaterialShininess;
+
   uniform bool uUseLighting;
   uniform bool uUseTextures;
 
@@ -34,7 +36,7 @@
       vec3 eyeDirection = normalize(-vPosition.xyz);
       vec3 reflectionDirection = normalize(-reflect(lightDirection, vTransformedNormal.xyz));
 
-      float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 10.0);
+      float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
       specularLightWeighting = clamp(specularLightWeighting, 0.0, 1.0);
       float diffuseLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
       lightWeighting = uAmbientColor
@@ -154,6 +156,7 @@
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+    shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
     shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
@@ -383,6 +386,8 @@
     gl.bindTexture(gl.TEXTURE_2D, earthTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
+    gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
+
     gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, earthVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -452,6 +457,15 @@
 <input type="checkbox" id="textures" checked /> Use textures<br/>
 
 <br/>
+<h2>Material:</h2>
+
+<table style="border: 0; padding: 10px;">
+<tr>
+<td><b>Shininess:</b>
+<td><input type="text" id="shininess" value="32.0" />
+</tr>
+</table>
+
 <h2>Point light:</h2>
 
 <table style="border: 0; padding: 10px;">
