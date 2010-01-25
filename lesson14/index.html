@@ -19,6 +19,7 @@
   uniform vec3 uAmbientColor;
 
   uniform vec3 uPointLightingLocation;
+  uniform vec3 uPointLightingSpecularColor;
   uniform vec3 uPointLightingDiffuseColor;
 
   uniform sampler2D uSampler;
@@ -151,6 +152,7 @@
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
     shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
+    shaderProgram.pointLightingSpecularColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingSpecularColor");
     shaderProgram.pointLightingDiffuseColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingDiffuseColor");
   }
 
@@ -344,6 +346,13 @@
         parseFloat(document.getElementById("lightPositionX").value),
         parseFloat(document.getElementById("lightPositionY").value),
         parseFloat(document.getElementById("lightPositionZ").value)
+      );
+
+      gl.uniform3f(
+        shaderProgram.pointLightingSpecularColorUniform,
+        parseFloat(document.getElementById("specularR").value),
+        parseFloat(document.getElementById("specularG").value),
+        parseFloat(document.getElementById("specularB").value)
       );
 
       gl.uniform3f(
