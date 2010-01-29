@@ -16,6 +16,7 @@
 
   uniform float uMaterialShininess;
 
+  uniform bool uShowSpecularHighlights;
   uniform bool uUseLighting;
   uniform bool uUseTextures;
 
@@ -34,11 +35,16 @@
       lightWeighting = vec3(1.0, 1.0, 1.0);
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
-      vec3 eyeDirection = normalize(-vPosition.xyz);
-      vec3 reflectionDirection = normalize(-reflect(lightDirection, vTransformedNormal.xyz));
 
-      float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
-      specularLightWeighting = clamp(specularLightWeighting, 0.0, 1.0);
+      float specularLightWeighting = 0.0;
+      if (uShowSpecularHighlights) {
+        vec3 eyeDirection = normalize(-vPosition.xyz);
+        vec3 reflectionDirection = normalize(-reflect(lightDirection, vTransformedNormal.xyz));
+
+        specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
+        specularLightWeighting = clamp(specularLightWeighting, 0.0, 1.0);
+      }
+
       float diffuseLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
       lightWeighting = uAmbientColor
         + uPointLightingSpecularColor * specularLightWeighting
@@ -158,6 +164,7 @@
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
+    shaderProgram.showSpecularHighlightsUniform = gl.getUniformLocation(shaderProgram, "uShowSpecularHighlights");
     shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
@@ -292,6 +299,9 @@
 
     perspective(45, 1.0, 0.1, 100.0);
 
+    var specularHighlights = document.getElementById("specular").checked;
+    gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, specularHighlights);
+
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
     if (lighting) {
@@ -405,6 +415,7 @@
   <canvas id="lesson14-canvas" style="border: none;" width="500" height="500"></canvas>
 
   <br/>
+<input type="checkbox" id="specular" checked /> Show specular highlight<br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
 <input type="checkbox" id="textures" checked /> Use textures<br/>
 
