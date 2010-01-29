@@ -187,8 +187,8 @@
 
   var earthTexture;
   var earthImage;
-  var zincTexture;
-  var zincImage;
+  var galvanizedTexture;
+  var galvanizedImage;
   function initTextures() {
     earthTexture = gl.createTexture();
     earthImage = new Image();
@@ -198,13 +198,13 @@
 
     earthImage.src = "earth.jpg";
 
-    zincTexture = gl.createTexture();
-    zincImage = new Image();
-    zincImage.onload = function() {
-      handleLoadedTexture(zincImage, zincTexture)
+    galvanizedTexture = gl.createTexture();
+    galvanizedImage = new Image();
+    galvanizedImage.onload = function() {
+      handleLoadedTexture(galvanizedImage, galvanizedTexture)
     }
 
-    zincImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
+    galvanizedImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
   }
 
 
@@ -355,8 +355,8 @@
     gl.activeTexture(gl.TEXTURE0);
     if (texture == "earth") {
       gl.bindTexture(gl.TEXTURE_2D, earthTexture);
-    } else if (texture == "zinc") {
-      gl.bindTexture(gl.TEXTURE_2D, zincTexture);
+    } else if (texture == "galvanized") {
+      gl.bindTexture(gl.TEXTURE_2D, galvanizedTexture);
     }
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
@@ -432,7 +432,7 @@
 Texture:
 <select id="texture">
   <option value="none">None</option>
-  <option selected value="zinc">Zinc</option>
+  <option selected value="galvanized">Galvanized</option>
   <option value="earth">Earth</option>
 </select>
 
@@ -481,7 +481,7 @@ Texture:
 
 
 <br/>
-Zinc texture courtesy of <a href="http://www.arroway-textures.com/">Arroway Textures</a>.<br/>
+Galvanized texture courtesy of <a href="http://www.arroway-textures.com/">Arroway Textures</a>.<br/>
 Earth texture courtesy of <a href="http://www.esa.int/esaEO/SEMGSY2IU7E_index_0.html">the European Space Agency/Envisat</a>.<br/>
 <br/>
 
