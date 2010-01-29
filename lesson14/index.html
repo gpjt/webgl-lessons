@@ -187,6 +187,8 @@
 
   var earthTexture;
   var earthImage;
+  var zincTexture;
+  var zincImage;
   function initTextures() {
     earthTexture = gl.createTexture();
     earthImage = new Image();
@@ -195,6 +197,14 @@
     }
 
     earthImage.src = "earth.jpg";
+
+    zincTexture = gl.createTexture();
+    zincImage = new Image();
+    zincImage.onload = function() {
+      handleLoadedTexture(zincImage, zincTexture)
+    }
+
+    zincImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
   }
 
 
@@ -261,38 +271,38 @@
   }
 
 
-  var earthVertexPositionBuffer;
-  var earthVertexNormalBuffer;
-  var earthVertexTextureCoordBuffer;
-  var earthVertexIndexBuffer;
+  var teapotVertexPositionBuffer;
+  var teapotVertexNormalBuffer;
+  var teapotVertexTextureCoordBuffer;
+  var teapotVertexIndexBuffer;
   function initBuffers() {
-    earthVertexNormalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexNormalBuffer);
+    teapotVertexNormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexNormals), gl.STATIC_DRAW);
-    earthVertexNormalBuffer.itemSize = 3;
-    earthVertexNormalBuffer.numItems = teapotData.vertexNormals.length / 3;
+    teapotVertexNormalBuffer.itemSize = 3;
+    teapotVertexNormalBuffer.numItems = teapotData.vertexNormals.length / 3;
 
-    earthVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
+    teapotVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexTextureCoords), gl.STATIC_DRAW);
-    earthVertexTextureCoordBuffer.itemSize = 2;
-    earthVertexTextureCoordBuffer.numItems = teapotData.vertexTextureCoords.length / 2;
+    teapotVertexTextureCoordBuffer.itemSize = 2;
+    teapotVertexTextureCoordBuffer.numItems = teapotData.vertexTextureCoords.length / 2;
 
-    earthVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexPositionBuffer);
+    teapotVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexPositions), gl.STATIC_DRAW);
-    earthVertexPositionBuffer.itemSize = 3;
-    earthVertexPositionBuffer.numItems = teapotData.vertexPositions.length / 3;
+    teapotVertexPositionBuffer.itemSize = 3;
+    teapotVertexPositionBuffer.numItems = teapotData.vertexPositions.length / 3;
 
-    earthVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
+    teapotVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(teapotData.indices), gl.STREAM_DRAW);
-    earthVertexIndexBuffer.itemSize = 3;
-    earthVertexIndexBuffer.numItems = teapotData.indices.length;
+    teapotVertexIndexBuffer.itemSize = 3;
+    teapotVertexIndexBuffer.numItems = teapotData.indices.length;
   }
 
 
-  var earthAngle = 180;
+  var teapotAngle = 180;
 
   function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -334,34 +344,36 @@
       );
     }
 
-    var textures = document.getElementById("textures").checked;
-    gl.uniform1i(shaderProgram.useTexturesUniform, textures);
+    var texture = document.getElementById("texture").value;
+    gl.uniform1i(shaderProgram.useTexturesUniform, texture != "none");
 
     loadIdentity();
 
     mvTranslate([0, 0, -40]);
-
-    // Use roughly the correct axial tilt
     mvRotate(23.4, [1, 0, -1]);
-    mvRotate(earthAngle, [0, 1, 0]);
+    mvRotate(teapotAngle, [0, 1, 0]);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, earthTexture);
+    if (texture == "earth") {
+      gl.bindTexture(gl.TEXTURE_2D, earthTexture);
+    } else if (texture == "zinc") {
+      gl.bindTexture(gl.TEXTURE_2D, zincTexture);
+    }
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
     gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, earthVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, earthVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, teapotVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, earthVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, earthVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   }
 
 
@@ -371,7 +383,7 @@
     if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
-      earthAngle += 0.05 * elapsed;
+      teapotAngle += 0.05 * elapsed;
     }
     lastTime = timeNow;
   }
@@ -417,7 +429,12 @@
   <br/>
 <input type="checkbox" id="specular" checked /> Show specular highlight<br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
-<input type="checkbox" id="textures" checked /> Use textures<br/>
+Texture:
+<select id="texture">
+  <option value="none">None</option>
+  <option selected value="zinc">Zinc</option>
+  <option value="earth">Earth</option>
+</select>
 
 <br/>
 <h2>Material:</h2>
