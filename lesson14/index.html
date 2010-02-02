@@ -6,7 +6,6 @@
 
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
-<script type="text/javascript" src="Teapot.js"></script>
 
 
 <script id="per-fragment-lighting-fs" type="x-shader/x-fragment">
@@ -275,7 +274,7 @@
   var teapotVertexNormalBuffer;
   var teapotVertexTextureCoordBuffer;
   var teapotVertexIndexBuffer;
-  function initBuffers() {
+  function handleLoadedTeapot(teapotData) {
     teapotVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexNormals), gl.STATIC_DRAW);
@@ -299,6 +298,20 @@
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(teapotData.indices), gl.STREAM_DRAW);
     teapotVertexIndexBuffer.itemSize = 3;
     teapotVertexIndexBuffer.numItems = teapotData.indices.length;
+
+    document.getElementById("loadingtext").textContent = "";
+  }
+
+
+  function loadTeapot() {
+    var request = new XMLHttpRequest();
+    request.open("GET", "Teapot.json");
+    request.onreadystatechange = function() {
+      if (request.readyState == 4) {
+        handleLoadedTeapot(eval('(' + request.responseText + ')'));
+      }
+    }
+    request.send();
   }
 
 
@@ -306,6 +319,10 @@
 
   function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    if (teapotVertexPositionBuffer == null || teapotVertexNormalBuffer == null || teapotVertexTextureCoordBuffer == null || teapotVertexIndexBuffer == null) {
+      return;
+    }
 
     perspective(45, 1.0, 0.1, 100.0);
 
@@ -400,8 +417,8 @@
     var canvas = document.getElementById("lesson14-canvas");
     initGL(canvas);
     initShaders();
-    initBuffers();
     initTextures();
+    loadTeapot();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -418,6 +435,17 @@
 </script>
 
 
+<style type="text/css">
+    #loadingtext {
+        position:absolute;
+        top:250px;
+        left:150px;
+        font-size:2em;
+        color: white;
+    }
+</style>
+
+
 </head>
 
 
@@ -425,6 +453,9 @@
   <a href="http://learningwebgl.com/blog/?p=1658">&lt;&lt; Back to Lesson 14</a><br />
 
   <canvas id="lesson14-canvas" style="border: none;" width="500" height="500"></canvas>
+
+  <div id="loadingtext">Loading world...</div>
+
 
   <br/>
 <input type="checkbox" id="specular" checked /> Show specular highlight<br/>
