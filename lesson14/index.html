@@ -34,17 +34,18 @@
       lightWeighting = vec3(1.0, 1.0, 1.0);
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
+      vec3 normal = normalize(vTransformedNormal.xyz);
 
       float specularLightWeighting = 0.0;
       if (uShowSpecularHighlights) {
         vec3 eyeDirection = normalize(-vPosition.xyz);
-        vec3 reflectionDirection = normalize(-reflect(lightDirection, vTransformedNormal.xyz));
+        vec3 reflectionDirection = normalize(-reflect(lightDirection, normal));
 
         specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
         specularLightWeighting = clamp(specularLightWeighting, 0.0, 1.0);
       }
 
-      float diffuseLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
+      float diffuseLightWeighting = max(dot(normal, lightDirection), 0.0);
       lightWeighting = uAmbientColor
         + uPointLightingSpecularColor * specularLightWeighting
         + uPointLightingDiffuseColor * diffuseLightWeighting;

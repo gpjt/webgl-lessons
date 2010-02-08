@@ -86,7 +86,7 @@
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
 
-      float directionalLightWeighting = max(dot(vTransformedNormal.xyz, lightDirection), 0.0);
+      float directionalLightWeighting = max(dot(normalize(vTransformedNormal.xyz), lightDirection), 0.0);
       lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
 
