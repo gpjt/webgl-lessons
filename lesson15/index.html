@@ -14,8 +14,6 @@
   varying vec4 vTransformedNormal;
   varying vec4 vPosition;
 
-  uniform float uMaterialShininess;
-
   uniform bool uShowSpecularHighlights;
   uniform bool uUseLighting;
   uniform bool uUseTextures;
@@ -26,7 +24,8 @@
   uniform vec3 uPointLightingSpecularColor;
   uniform vec3 uPointLightingDiffuseColor;
 
-  uniform sampler2D uSampler;
+  uniform sampler2D uColorMapSampler;
+  uniform sampler2D uSpecularMapSampler;
 
 
   void main(void) {
@@ -38,11 +37,12 @@
       vec3 normal = normalize(vTransformedNormal.xyz);
 
       float specularLightWeighting = 0.0;
-      if (uShowSpecularHighlights) {
+      float shininess = texture2D(uSpecularMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t)).r * 255.0;
+      if (uShowSpecularHighlights && shininess < 254.0) {
         vec3 eyeDirection = normalize(-vPosition.xyz);
         vec3 reflectionDirection = reflect(-lightDirection, normal);
 
-        specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
+        specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), shininess);
       }
 
       float diffuseLightWeighting = max(dot(normal, lightDirection), 0.0);
@@ -53,7 +53,7 @@
 
     vec4 fragmentColor;
     if (uUseTextures) {
-      fragmentColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+      fragmentColor = texture2D(uColorMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
     } else {
       fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
@@ -162,8 +162,8 @@
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-    shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
+    shaderProgram.colorMapSamplerUniform = gl.getUniformLocation(shaderProgram, "uColorMapSampler");
+    shaderProgram.specularMapSamplerUniform = gl.getUniformLocation(shaderProgram, "uSpecularMapSampler");
     shaderProgram.showSpecularHighlightsUniform = gl.getUniformLocation(shaderProgram, "uShowSpecularHighlights");
     shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
@@ -185,26 +185,46 @@
   }
 
 
-  var earthTexture;
-  var earthImage;
-  var galvanizedTexture;
-  var galvanizedImage;
+  var earthColorMapTexture;
+  var earthColorMapImage;
+  var earthSpecularMapTexture;
+  var earthSpecularMapImage;
+  var galvanizedColorMapTexture;
+  var galvanizedColorMapImage;
+  var galvanizedSpecularMapTexture;
+  var galvanizedSpecularMapImage;
   function initTextures() {
-    earthTexture = gl.createTexture();
-    earthImage = new Image();
-    earthImage.onload = function() {
-      handleLoadedTexture(earthImage, earthTexture)
+    earthColorMapTexture = gl.createTexture();
+    earthColorMapImage = new Image();
+    earthColorMapImage.onload = function() {
+      handleLoadedTexture(earthColorMapImage, earthColorMapTexture)
     }
 
-    earthImage.src = "earth.jpg";
+    earthColorMapImage.src = "earth.jpg";
 
-    galvanizedTexture = gl.createTexture();
-    galvanizedImage = new Image();
-    galvanizedImage.onload = function() {
-      handleLoadedTexture(galvanizedImage, galvanizedTexture)
+    earthSpecularMapTexture = gl.createTexture();
+    earthSpecularMapImage = new Image();
+    earthSpecularMapImage.onload = function() {
+      handleLoadedTexture(earthSpecularMapImage, earthSpecularMapTexture)
     }
 
-    galvanizedImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
+    earthSpecularMapImage.src = "earth-specular.gif";
+
+    galvanizedColorMapTexture = gl.createTexture();
+    galvanizedColorMapImage = new Image();
+    galvanizedColorMapImage.onload = function() {
+      handleLoadedTexture(galvanizedColorMapImage, galvanizedColorMapTexture)
+    }
+
+    galvanizedColorMapImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
+
+    galvanizedSpecularMapTexture = gl.createTexture();
+    galvanizedSpecularMapImage = new Image();
+    galvanizedSpecularMapImage.onload = function() {
+      handleLoadedTexture(galvanizedSpecularMapImage, galvanizedSpecularMapTexture)
+    }
+
+    galvanizedSpecularMapImage.src = "arroway.de_metal+structure+06_s100+(g010).jpg";
   }
 
 
@@ -316,6 +336,86 @@
   }
 
 
+  var sphereVertexNormalBuffer;
+  var sphereVertexTextureCoordBuffer;
+  var sphereVertexPositionBuffer;
+  var sphereVertexIndexBuffer;
+  function initBuffers() {
+    var latitudeBands = 30;
+    var longitudeBands = 30;
+    var radius = 13;
+
+    var vertexPositionData = [];
+    var normalData = [];
+    var textureCoordData = [];
+    for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+      var theta = latNumber * Math.PI / latitudeBands;
+      var sinTheta = Math.sin(theta);
+      var cosTheta = Math.cos(theta);
+
+      for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+        var phi = longNumber * 2 * Math.PI / longitudeBands;
+        var sinPhi = Math.sin(phi);
+        var cosPhi = Math.cos(phi);
+
+        var x = cosPhi * sinTheta;
+        var y = cosTheta;
+        var z = sinPhi * sinTheta;
+        var u = 1 - (longNumber / longitudeBands);
+        var v = 1 - (latNumber / latitudeBands);
+
+        normalData.push(x);
+        normalData.push(y);
+        normalData.push(z);
+        textureCoordData.push(u);
+        textureCoordData.push(v);
+        vertexPositionData.push(radius * x);
+        vertexPositionData.push(radius * y);
+        vertexPositionData.push(radius * z);
+      }
+    }
+
+    var indexData = [];
+    for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
+      for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
+        var first = (latNumber * (longitudeBands + 1)) + longNumber;
+        var second = first + longitudeBands + 1;
+        indexData.push(first);
+        indexData.push(second);
+        indexData.push(first + 1);
+
+        indexData.push(second);
+        indexData.push(second + 1);
+        indexData.push(first + 1);
+      }
+    }
+
+    sphereVertexNormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexNormalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(normalData), gl.STATIC_DRAW);
+    sphereVertexNormalBuffer.itemSize = 3;
+    sphereVertexNormalBuffer.numItems = normalData.length / 3;
+
+    sphereVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoordData), gl.STATIC_DRAW);
+    sphereVertexTextureCoordBuffer.itemSize = 2;
+    sphereVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
+
+    sphereVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexPositionData), gl.STATIC_DRAW);
+    sphereVertexPositionBuffer.itemSize = 3;
+    sphereVertexPositionBuffer.numItems = vertexPositionData.length / 3;
+
+    sphereVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(indexData), gl.STREAM_DRAW);
+    sphereVertexIndexBuffer.itemSize = 3;
+    sphereVertexIndexBuffer.numItems = indexData.length;
+  }
+
+
   var teapotAngle = 180;
 
   function drawScene() {
@@ -370,28 +470,49 @@
     mvTranslate([0, 0, -40]);
     mvRotate(23.4, [1, 0, -1]);
     mvRotate(teapotAngle, [0, 1, 0]);
+
     gl.activeTexture(gl.TEXTURE0);
     if (texture == "earth") {
-      gl.bindTexture(gl.TEXTURE_2D, earthTexture);
+      gl.bindTexture(gl.TEXTURE_2D, earthColorMapTexture);
     } else if (texture == "galvanized") {
-      gl.bindTexture(gl.TEXTURE_2D, galvanizedTexture);
+      gl.bindTexture(gl.TEXTURE_2D, galvanizedColorMapTexture);
     }
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    gl.uniform1i(shaderProgram.colorMapSamplerUniform, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    if (texture == "earth") {
+      gl.bindTexture(gl.TEXTURE_2D, earthSpecularMapTexture);
+    } else if (texture == "galvanized") {
+      gl.bindTexture(gl.TEXTURE_2D, galvanizedSpecularMapTexture);
+    }
+    gl.uniform1i(shaderProgram.specularMapSamplerUniform, 1);
+
 
     gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    var positionBuffer = sphereVertexPositionBuffer;
+    var textureCoordBuffer = sphereVertexTextureCoordBuffer;
+    var normalBuffer = sphereVertexNormalBuffer;
+    var indexBuffer = sphereVertexIndexBuffer;
+    if (document.getElementById("object").value == "teapot")  {
+      positionBuffer = teapotVertexPositionBuffer;
+      textureCoordBuffer = teapotVertexTextureCoordBuffer;
+      normalBuffer = teapotVertexNormalBuffer;
+      indexBuffer = teapotVertexIndexBuffer;
+    }
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, teapotVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, positionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, teapotVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   }
 
 
@@ -418,6 +539,7 @@
     var canvas = document.getElementById("lesson15-canvas");
     initGL(canvas);
     initShaders();
+    initBuffers();
     initTextures();
     loadTeapot();
 
@@ -461,6 +583,11 @@
   <br/>
 <input type="checkbox" id="specular" checked /> Show specular highlight<br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
+Object:
+<select id="object">
+  <option selected value="sphere">Sphere</option>
+  <option value="teapot">Teapot</option>
+</select><br/>
 Texture:
 <select id="texture">
   <option value="none">None</option>
