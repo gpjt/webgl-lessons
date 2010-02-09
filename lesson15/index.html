@@ -311,51 +311,6 @@
   }
 
 
-  var teapotVertexPositionBuffer;
-  var teapotVertexNormalBuffer;
-  var teapotVertexTextureCoordBuffer;
-  var teapotVertexIndexBuffer;
-  function handleLoadedTeapot(teapotData) {
-    teapotVertexNormalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexNormals), gl.STATIC_DRAW);
-    teapotVertexNormalBuffer.itemSize = 3;
-    teapotVertexNormalBuffer.numItems = teapotData.vertexNormals.length / 3;
-
-    teapotVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexTextureCoords), gl.STATIC_DRAW);
-    teapotVertexTextureCoordBuffer.itemSize = 2;
-    teapotVertexTextureCoordBuffer.numItems = teapotData.vertexTextureCoords.length / 2;
-
-    teapotVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(teapotData.vertexPositions), gl.STATIC_DRAW);
-    teapotVertexPositionBuffer.itemSize = 3;
-    teapotVertexPositionBuffer.numItems = teapotData.vertexPositions.length / 3;
-
-    teapotVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(teapotData.indices), gl.STREAM_DRAW);
-    teapotVertexIndexBuffer.itemSize = 3;
-    teapotVertexIndexBuffer.numItems = teapotData.indices.length;
-
-    document.getElementById("loadingtext").textContent = "";
-  }
-
-
-  function loadTeapot() {
-    var request = new XMLHttpRequest();
-    request.open("GET", "Teapot.json");
-    request.onreadystatechange = function() {
-      if (request.readyState == 4) {
-        handleLoadedTeapot(JSON.parse(request.responseText));
-      }
-    }
-    request.send();
-  }
-
-
   var sphereVertexNormalBuffer;
   var sphereVertexTextureCoordBuffer;
   var sphereVertexPositionBuffer;
@@ -436,14 +391,10 @@
   }
 
 
-  var teapotAngle = 180;
+  var earthAngle = 180;
 
   function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-    if (teapotVertexPositionBuffer == null || teapotVertexNormalBuffer == null || teapotVertexTextureCoordBuffer == null || teapotVertexIndexBuffer == null) {
-      return;
-    }
 
     perspective(45, 1.0, 0.1, 100.0);
 
@@ -492,59 +443,32 @@
 
     mvTranslate([0, 0, -40]);
     mvRotate(23.4, [1, 0, -1]);
-    mvRotate(teapotAngle, [0, 1, 0]);
+    mvRotate(earthAngle, [0, 1, 0]);
 
-    var texture = document.getElementById("texture").value;
     gl.activeTexture(gl.TEXTURE0);
-    if (texture == "earth") {
-      gl.bindTexture(gl.TEXTURE_2D, earthColorMapTexture);
-    } else if (texture == "galvanized") {
-      gl.bindTexture(gl.TEXTURE_2D, galvanizedColorMapTexture);
-    }
+    gl.bindTexture(gl.TEXTURE_2D, earthColorMapTexture);
     gl.uniform1i(shaderProgram.colorMapSamplerUniform, 0);
 
     gl.activeTexture(gl.TEXTURE1);
-    if (texture == "earth") {
-      gl.bindTexture(gl.TEXTURE_2D, earthSpecularMapTexture);
-    } else if (texture == "galvanized") {
-      gl.bindTexture(gl.TEXTURE_2D, galvanizedSpecularMapTexture);
-    }
+    gl.bindTexture(gl.TEXTURE_2D, earthSpecularMapTexture);
     gl.uniform1i(shaderProgram.specularMapSamplerUniform, 1);
 
     gl.activeTexture(gl.TEXTURE2);
-    if (texture == "earth") {
-      gl.bindTexture(gl.TEXTURE_2D, earthNormalMapTexture);
-    } else if (texture == "galvanized") {
-      gl.bindTexture(gl.TEXTURE_2D, earthNormalMapTexture);
-    }
+    gl.bindTexture(gl.TEXTURE_2D, earthNormalMapTexture);
     gl.uniform1i(shaderProgram.normalMapSamplerUniform, 2);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, sphereVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.uniform1f(shaderProgram.materialShininessUniform, parseFloat(document.getElementById("shininess").value));
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, sphereVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    var positionBuffer = sphereVertexPositionBuffer;
-    var textureCoordBuffer = sphereVertexTextureCoordBuffer;
-    var normalBuffer = sphereVertexNormalBuffer;
-    var indexBuffer = sphereVertexIndexBuffer;
-    if (document.getElementById("object").value == "teapot")  {
-      positionBuffer = teapotVertexPositionBuffer;
-      textureCoordBuffer = teapotVertexTextureCoordBuffer;
-      normalBuffer = teapotVertexNormalBuffer;
-      indexBuffer = teapotVertexIndexBuffer;
-    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, sphereVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, positionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, sphereVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   }
 
 
@@ -554,7 +478,7 @@
     if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
-      teapotAngle += 0.05 * elapsed;
+      earthAngle += 0.05 * elapsed;
     }
     lastTime = timeNow;
   }
@@ -573,7 +497,6 @@
     initShaders();
     initBuffers();
     initTextures();
-    loadTeapot();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -589,18 +512,6 @@
 
 </script>
 
-
-<style type="text/css">
-    #loadingtext {
-        position:absolute;
-        top:250px;
-        left:150px;
-        font-size:2em;
-        color: white;
-    }
-</style>
-
-
 </head>
 
 
@@ -609,35 +520,11 @@
 
   <canvas id="lesson15-canvas" style="border: none;" width="500" height="500"></canvas>
 
-  <div id="loadingtext">Loading world...</div>
-
-
   <br/>
 <input type="checkbox" id="color-map" checked /> Use color map<br/>
 <input type="checkbox" id="specular-map" checked /> Use specular map<br/>
 <input type="checkbox" id="normal-map" checked /> Use normal map<br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
-Object:
-<select id="object">
-  <option selected value="sphere">Sphere</option>
-  <option value="teapot">Teapot</option>
-</select><br/>
-Texture:
-<select id="texture">
-  <option value="none">None</option>
-  <option selected value="galvanized">Galvanized</option>
-  <option value="earth">Earth</option>
-</select>
-
-<br/>
-<h2>Material:</h2>
-
-<table style="border: 0; padding: 10px;">
-<tr>
-<td><b>Shininess:</b>
-<td><input type="text" id="shininess" value="32.0" />
-</tr>
-</table>
 
 <h2>Point light:</h2>
 
