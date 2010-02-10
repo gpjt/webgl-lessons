@@ -37,7 +37,8 @@
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
       vec3 normal = normalize(vTransformedNormal.xyz);
       if (uUseNormalMap) {
-        normal = normalize(normal + texture2D(uNormalMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t)).xyz * 10);
+        vec3 mapNormal = texture2D(uNormalMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t)).xyz * 2.0 - 1.0;
+        normal = normalize(normal * mapNormal);
       }
 
       float specularLightWeighting = 0.0;
