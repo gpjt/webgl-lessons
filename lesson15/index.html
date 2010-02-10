@@ -15,7 +15,6 @@
 
   uniform bool uUseColorMap;
   uniform bool uUseSpecularMap;
-  uniform bool uUseNormalMap;
   uniform bool uUseLighting;
 
   uniform vec3 uAmbientColor;
@@ -26,7 +25,6 @@
 
   uniform sampler2D uColorMapSampler;
   uniform sampler2D uSpecularMapSampler;
-  uniform sampler2D uNormalMapSampler;
 
 
   void main(void) {
@@ -36,10 +34,6 @@
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
       vec3 normal = normalize(vTransformedNormal.xyz);
-      if (uUseNormalMap) {
-        vec3 mapNormal = texture2D(uNormalMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t)).xyz * 2.0 - 1.0;
-        normal = normalize(normal * mapNormal);
-      }
 
       float specularLightWeighting = 0.0;
       float shininess = 32.0;
@@ -172,10 +166,8 @@
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.colorMapSamplerUniform = gl.getUniformLocation(shaderProgram, "uColorMapSampler");
     shaderProgram.specularMapSamplerUniform = gl.getUniformLocation(shaderProgram, "uSpecularMapSampler");
-    shaderProgram.normalMapSamplerUniform = gl.getUniformLocation(shaderProgram, "uNormalMapSampler");
     shaderProgram.useColorMapUniform = gl.getUniformLocation(shaderProgram, "uUseColorMap");
     shaderProgram.useSpecularMapUniform = gl.getUniformLocation(shaderProgram, "uUseSpecularMap");
-    shaderProgram.useNormalMapUniform = gl.getUniformLocation(shaderProgram, "uUseNormalMap");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
     shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
@@ -199,12 +191,6 @@
   var earthColorMapImage;
   var earthSpecularMapTexture;
   var earthSpecularMapImage;
-  var earthNormalMapTexture;
-  var earthNormalMapImage;
-  var galvanizedColorMapTexture;
-  var galvanizedColorMapImage;
-  var galvanizedSpecularMapTexture;
-  var galvanizedSpecularMapImage;
   function initTextures() {
     earthColorMapTexture = gl.createTexture();
     earthColorMapImage = new Image();
@@ -221,30 +207,6 @@
     }
 
     earthSpecularMapImage.src = "earth-specular.gif";
-
-    earthNormalMapTexture = gl.createTexture();
-    earthNormalMapImage = new Image();
-    earthNormalMapImage.onload = function() {
-      handleLoadedTexture(earthNormalMapImage, earthNormalMapTexture)
-    }
-
-    earthNormalMapImage.src = "Earth-normal-8k.jpg";
-
-    galvanizedColorMapTexture = gl.createTexture();
-    galvanizedColorMapImage = new Image();
-    galvanizedColorMapImage.onload = function() {
-      handleLoadedTexture(galvanizedColorMapImage, galvanizedColorMapTexture)
-    }
-
-    galvanizedColorMapImage.src = "arroway.de_metal+structure+06_d100_flat.jpg";
-
-    galvanizedSpecularMapTexture = gl.createTexture();
-    galvanizedSpecularMapImage = new Image();
-    galvanizedSpecularMapImage.onload = function() {
-      handleLoadedTexture(galvanizedSpecularMapImage, galvanizedSpecularMapTexture)
-    }
-
-    galvanizedSpecularMapImage.src = "arroway.de_metal+structure+06_s100+(g010).jpg";
   }
 
 
@@ -404,9 +366,6 @@
     var useSpecularMap = document.getElementById("specular-map").checked;
     gl.uniform1i(shaderProgram.useSpecularMapUniform, useSpecularMap);
 
-    var useNormalMap = document.getElementById("normal-map").checked;
-    gl.uniform1i(shaderProgram.useNormalMapUniform, useNormalMap);
-
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
     if (lighting) {
@@ -452,10 +411,6 @@
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, earthSpecularMapTexture);
     gl.uniform1i(shaderProgram.specularMapSamplerUniform, 1);
-
-    gl.activeTexture(gl.TEXTURE2);
-    gl.bindTexture(gl.TEXTURE_2D, earthNormalMapTexture);
-    gl.uniform1i(shaderProgram.normalMapSamplerUniform, 2);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, sphereVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -523,7 +478,6 @@
   <br/>
 <input type="checkbox" id="color-map" checked /> Use color map<br/>
 <input type="checkbox" id="specular-map" checked /> Use specular map<br/>
-<input type="checkbox" id="normal-map" checked /> Use normal map<br/>
 <input type="checkbox" id="lighting" checked /> Use lighting<br/>
 
 <h2>Point light:</h2>
@@ -561,7 +515,6 @@
 
 
 <br/>
-Galvanized texture courtesy of <a href="http://www.arroway-textures.com/">Arroway Textures</a>.<br/>
 Earth texture courtesy of <a href="http://www.esa.int/esaEO/SEMGSY2IU7E_index_0.html">the European Space Agency/Envisat</a>.<br/>
 <br/>
 
