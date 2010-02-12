@@ -116,9 +116,9 @@
   }
 
 
-  function handleLoadedTexture(image, texture) {
+  function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
@@ -127,15 +127,14 @@
 
 
   var starTexture;
-  var starImage;
   function initTexture() {
     starTexture = gl.createTexture();
-    starImage = new Image();
-    starImage.onload = function() {
-      handleLoadedTexture(starImage, starTexture)
+    starTexture.image = new Image();
+    starTexture.image.onload = function() {
+      handleLoadedTexture(starTexture)
     }
 
-    starImage.src = "star.gif";
+    starTexture.image.src = "star.gif";
   }
 
 

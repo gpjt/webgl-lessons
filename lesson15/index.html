@@ -177,9 +177,9 @@
   }
 
 
-  function handleLoadedTexture(image, texture) {
+  function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);
@@ -189,25 +189,21 @@
 
 
   var earthColorMapTexture;
-  var earthColorMapImage;
   var earthSpecularMapTexture;
-  var earthSpecularMapImage;
   function initTextures() {
     earthColorMapTexture = gl.createTexture();
-    earthColorMapImage = new Image();
-    earthColorMapImage.onload = function() {
-      handleLoadedTexture(earthColorMapImage, earthColorMapTexture)
+    earthColorMapTexture.image = new Image();
+    earthColorMapTexture.image.onload = function() {
+      handleLoadedTexture(earthColorMapTexture)
     }
-
-    earthColorMapImage.src = "earth.jpg";
+    earthColorMapTexture.image.src = "earth.jpg";
 
     earthSpecularMapTexture = gl.createTexture();
-    earthSpecularMapImage = new Image();
-    earthSpecularMapImage.onload = function() {
-      handleLoadedTexture(earthSpecularMapImage, earthSpecularMapTexture)
+    earthSpecularMapTexture.image = new Image();
+    earthSpecularMapTexture.image.onload = function() {
+      handleLoadedTexture(earthSpecularMapTexture)
     }
-
-    earthSpecularMapImage.src = "earth-specular.gif";
+    earthSpecularMapTexture.image.src = "earth-specular.gif";
   }
 
 

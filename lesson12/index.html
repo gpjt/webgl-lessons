@@ -143,9 +143,9 @@
   }
 
 
-  function handleLoadedTexture(image, texture) {
+  function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);
@@ -155,26 +155,21 @@
 
 
   var moonTexture;
-  var moonImage;
-
   var crateTexture;
-  var crateImage;
   function initTextures() {
     moonTexture = gl.createTexture();
-    moonImage = new Image();
-    moonImage.onload = function() {
-      handleLoadedTexture(moonImage, moonTexture)
+    moonTexture.image = new Image();
+    moonTexture.image.onload = function() {
+      handleLoadedTexture(moonTexture)
     }
-
-    moonImage.src = "moon.gif";
+    moonTexture.image.src = "moon.gif";
 
     crateTexture = gl.createTexture();
-    crateImage = new Image();
-    crateImage.onload = function() {
-      handleLoadedTexture(crateImage, crateTexture)
+    crateTexture.image = new Image();
+    crateTexture.image.onload = function() {
+      handleLoadedTexture(crateTexture)
     }
-
-    crateImage.src = "crate.gif";
+    crateTexture.image.src = "crate.gif";
   }
 
 

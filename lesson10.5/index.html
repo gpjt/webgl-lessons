@@ -140,9 +140,9 @@
   }
 
 
-  function handleLoadedTexture(image, texture) {
+  function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
@@ -151,15 +151,14 @@
 
 
   var mudTexture;
-  var mudImage;
   function initTexture() {
     mudTexture = gl.createTexture();
-    mudImage = new Image();
-    mudImage.onload = function() {
-      handleLoadedTexture(mudImage, mudTexture)
+    mudTexture.image = new Image();
+    mudTexture.image.onload = function() {
+      handleLoadedTexture(mudTexture)
     }
 
-    mudImage.src = "mud.gif";
+    mudTexture.image.src = "mud.gif";
   }
 
 
