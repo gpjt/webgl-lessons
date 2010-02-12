@@ -281,67 +281,68 @@
     this.dist = startingDistance;
     this.rotationSpeed = rotationSpeed;
 
-    this.draw = function(tilt, spin, twinkle) {
-      mvPushMatrix();
-
-      // Move to the star's position
-      mvRotate(this.angle, [0.0, 1.0, 0.0]);
-      mvTranslate([this.dist, 0.0, 0.0]);
-
-      // Rotate back so that the star is facing the viewer
-      mvRotate(-this.angle, [0.0, 1.0, 0.0]);
-      mvRotate(-tilt, [1.0, 0.0, 0.0]);
-
-      if (twinkle) {
-        // Draw a non-rotating star in the alternate "twinkling" color
-        gl.uniform3f(shaderProgram.colorUniform, this.twinkleR, this.twinkleG, this.twinkleB);
-        drawStar();
-      }
-
-      // All stars spin around the Z axis at the same rate
-      mvRotate(spin, [0.0, 0.0, 1.0]);
-
-      // Draw the star in its main color
-      gl.uniform3f(shaderProgram.colorUniform, this.r, this.g, this.b);
-      drawStar()
-
-      mvPopMatrix();
-    };
-
-    this.animate = function(elapsedTime) {
-      var effectiveFPMS = 60 / 1000;
-      this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
-
-      // Decrease the distance, resetting the star to the outside of
-      // the spiral if it's at the center.
-      this.dist -= 0.01 * effectiveFPMS * elapsedTime;
-      if (this.dist < 0.0) {
-        this.dist += 5.0;
-        this.randomiseColors();
-      }
-
-    };
-
-
-    this.randomiseColors = function() {
-      // Give the star a random color for normal
-      // circumstances...
-      this.r = Math.random();
-      this.g = Math.random();
-      this.b = Math.random();
-
-      // When the star is twinkling, we draw it twice, once
-      // in the color below (not spinning) and then once in the
-      // main color defined above.
-      this.twinkleR = Math.random();
-      this.twinkleG = Math.random();
-      this.twinkleB = Math.random();
-    };
-
     // Set the colors to a starting value.
     this.randomiseColors();
-
   }
+
+  Star.prototype.draw = function(tilt, spin, twinkle) {
+    mvPushMatrix();
+
+    // Move to the star's position
+    mvRotate(this.angle, [0.0, 1.0, 0.0]);
+    mvTranslate([this.dist, 0.0, 0.0]);
+
+    // Rotate back so that the star is facing the viewer
+    mvRotate(-this.angle, [0.0, 1.0, 0.0]);
+    mvRotate(-tilt, [1.0, 0.0, 0.0]);
+
+    if (twinkle) {
+      // Draw a non-rotating star in the alternate "twinkling" color
+      gl.uniform3f(shaderProgram.colorUniform, this.twinkleR, this.twinkleG, this.twinkleB);
+      drawStar();
+    }
+
+    // All stars spin around the Z axis at the same rate
+    mvRotate(spin, [0.0, 0.0, 1.0]);
+
+    // Draw the star in its main color
+    gl.uniform3f(shaderProgram.colorUniform, this.r, this.g, this.b);
+    drawStar()
+
+    mvPopMatrix();
+  };
+
+
+  Star.prototype.animate = function(elapsedTime) {
+    var effectiveFPMS = 60 / 1000;
+    this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
+
+    // Decrease the distance, resetting the star to the outside of
+    // the spiral if it's at the center.
+    this.dist -= 0.01 * effectiveFPMS * elapsedTime;
+    if (this.dist < 0.0) {
+      this.dist += 5.0;
+      this.randomiseColors();
+    }
+
+  };
+
+
+  Star.prototype.randomiseColors = function() {
+    // Give the star a random color for normal
+    // circumstances...
+    this.r = Math.random();
+    this.g = Math.random();
+    this.b = Math.random();
+
+    // When the star is twinkling, we draw it twice, once
+    // in the color below (not spinning) and then once in the
+    // main color defined above.
+    this.twinkleR = Math.random();
+    this.twinkleG = Math.random();
+    this.twinkleB = Math.random();
+  };
+
 
 
   var stars = [];

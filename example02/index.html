@@ -291,82 +291,81 @@
     this.centerOffsetsY = [0, 0, 0, 0, 0, 0];
     this.zoomCenterX = 0.28693186889504513;
     this.zoomCenterY = 0.014286693904085048;
+  }
 
 
-    this.animate = function(elapsed) {
-      this.xRot += (20 * elapsed) / 1000.0;
-      this.yRot += (90 * elapsed) / 1000.0;
-      this.zRot += (0 * elapsed) / 1000.0;
-      this.xPos += this.xVel;
-      this.yPos += this.yVel;
-      this.zPos += this.zVel;
-      if (this.xPos >= 4 || this.xPos <= -4) {
-        this.xVel = -this.xVel;
-      }
-      if (this.yPos >= 4 || this.yPos <= -4) {
-        this.yVel = -this.yVel;
-      }
-      if (this.zPos >= -9 || this.zPos <= -24) {
-        this.zVel = -this.zVel;
-      }
+  MandelbrotCube.prototype.animate = function(elapsed) {
+    this.xRot += (20 * elapsed) / 1000.0;
+    this.yRot += (90 * elapsed) / 1000.0;
+    this.zRot += (0 * elapsed) / 1000.0;
+    this.xPos += this.xVel;
+    this.yPos += this.yVel;
+    this.zPos += this.zVel;
+    if (this.xPos >= 4 || this.xPos <= -4) {
+      this.xVel = -this.xVel;
+    }
+    if (this.yPos >= 4 || this.yPos <= -4) {
+      this.yVel = -this.yVel;
+    }
+    if (this.zPos >= -9 || this.zPos <= -24) {
+      this.zVel = -this.zVel;
+    }
 
-      for (var i in this.zooms) {
-        if (this.zooms[i] < 1 || this.zooms[i] > 10000) {
-          this.zoomRates[i] = 1 / this.zoomRates[i];
+    for (var i in this.zooms) {
+      if (this.zooms[i] < 1 || this.zooms[i] > 10000) {
+        this.zoomRates[i] = 1 / this.zoomRates[i];
+      }
+      this.zooms[i] = this.zooms[i] * this.zoomRates[i];
+
+      if (this.zoomRates[i] > 1) {
+        if (this.centerOffsetsX[i] != this.zoomCenterX) {
+          this.centerOffsetsX[i] += (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
         }
-        this.zooms[i] = this.zooms[i] * this.zoomRates[i];
-
-        if (this.zoomRates[i] > 1) {
-          if (this.centerOffsetsX[i] != this.zoomCenterX) {
-            this.centerOffsetsX[i] += (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
-          }
-          if (this.centerOffsetsY[i] != this.zoomCenterY) {
-            this.centerOffsetsY[i] += (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
-          }
-        } else {
-          if (this.centerOffsetsX[i] != 0) {
-            this.centerOffsetsX[i] -= (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
-          }
-          if (this.centerOffsetsY[i] != 0) {
-            this.centerOffsetsY[i] -= (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
-          }
+        if (this.centerOffsetsY[i] != this.zoomCenterY) {
+          this.centerOffsetsY[i] += (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
+        }
+      } else {
+        if (this.centerOffsetsX[i] != 0) {
+          this.centerOffsetsX[i] -= (this.zoomCenterX - this.centerOffsetsX[i]) / 2;
+        }
+        if (this.centerOffsetsY[i] != 0) {
+          this.centerOffsetsY[i] -= (this.zoomCenterY - this.centerOffsetsY[i]) / 2;
         }
       }
     }
+  }
 
 
-    this.draw = function() {
-      gl.useProgram(mandelbrotProgram);
-      loadIdentity();
+  MandelbrotCube.prototype.draw = function() {
+    gl.useProgram(mandelbrotProgram);
+    loadIdentity();
 
-      mvTranslate([this.xPos, this.yPos, this.zPos])
+    mvTranslate([this.xPos, this.yPos, this.zPos])
 
-      mvRotate(this.xRot, [1, 0, 0]);
-      mvRotate(this.yRot, [0, 1, 0]);
-      mvRotate(this.zRot, [0, 0, 1]);
+    mvRotate(this.xRot, [1, 0, 0]);
+    mvRotate(this.yRot, [0, 1, 0]);
+    mvRotate(this.zRot, [0, 0, 1]);
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-      gl.vertexAttribPointer(mandelbrotVertexPosAttr, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+    gl.vertexAttribPointer(mandelbrotVertexPosAttr, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-      var positionBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      var positions = [];
-      for (var i = 0; i < 6; i++) {
-        positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);;
-        positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);
-        positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
-        positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
-      }
-      gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(positions), gl.STATIC_DRAW);
-      gl.vertexAttribPointer(mandelbrotPlotPosAttr, 2, gl.FLOAT, false, 0, 0);
-
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-      setMatrixUniforms();
-      gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-
-      gl.deleteBuffer(positionBuffer);
+    var positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    var positions = [];
+    for (var i = 0; i < 6; i++) {
+      positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);;
+      positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i], -1.2 / this.zooms[i] + this.centerOffsetsY[i]);
+      positions.push( 0.7 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
+      positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
     }
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(positions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(mandelbrotPlotPosAttr, 2, gl.FLOAT, false, 0, 0);
 
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    gl.deleteBuffer(positionBuffer);
   }
 
 
