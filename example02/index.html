@@ -168,50 +168,46 @@
   }
 
 
-  var colorProgram;
-  var colorVertexPosAttr;
-  var colorVertexColorAttr;
+  function initProgram(fragmentShaderName, vertexShaderName) {
+    var fragmentShader = getShader(gl, fragmentShaderName);
+    var vertexShader = getShader(gl, vertexShaderName);
 
-  var mandelbrotProgram;
-  var mandelbrotVertexPosAttr;
-  var mandelbrotPlotPosAttr;
+    var program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
 
-  function initShaders() {
-    var fragmentShader = getShader(gl, "mandelbrot-shader-fs");
-    var vertexShader = getShader(gl, "mandelbrot-shader-vs");
-
-    mandelbrotProgram = gl.createProgram();
-    gl.attachShader(mandelbrotProgram, vertexShader);
-    gl.attachShader(mandelbrotProgram, fragmentShader);
-    gl.linkProgram(mandelbrotProgram);
-
-    if (!gl.getProgramParameter(mandelbrotProgram, gl.LINK_STATUS)) {
-      alert("Could not initialise mandelbrot shaders");
-    }
-
-    mandelbrotVertexPosAttr = gl.getAttribLocation(mandelbrotProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(mandelbrotVertexPosAttr);
-
-    mandelbrotPlotPosAttr = gl.getAttribLocation(mandelbrotProgram, "aPlotPosition");
-    gl.enableVertexAttribArray(mandelbrotPlotPosAttr);
-
-    var fragmentShader = getShader(gl, "color-shader-fs");
-    var vertexShader = getShader(gl, "color-shader-vs");
-
-    colorProgram = gl.createProgram();
-    gl.attachShader(colorProgram, vertexShader);
-    gl.attachShader(colorProgram, fragmentShader);
-    gl.linkProgram(colorProgram);
-
-    if (!gl.getProgramParameter(colorProgram, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       alert("Could not initialise color shaders");
     }
 
-    colorVertexPosAttr = gl.getAttribLocation(colorProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(colorVertexPosAttr);
+    program.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+    gl.enableVertexAttribArray(program.vertexPositionAttribute);
 
-    colorVertexColorAttr = gl.getAttribLocation(colorProgram, "aColor");
-    gl.enableVertexAttribArray(colorVertexColorAttr);
+    program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
+    program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
+
+    return program;
+  }
+
+
+  var colorProgram;
+  var mandelbrotProgram;
+  function initPrograms() {
+    colorProgram = initProgram("color-shader-fs", "color-shader-vs");
+    colorProgram.vertexColorAttribute = gl.getAttribLocation(colorProgram, "aColor");
+    gl.enableVertexAttribArray(colorProgram.vertexColorAttribute);
+
+    mandelbrotProgram = initProgram("mandelbrot-shader-fs", "mandelbrot-shader-vs");
+    mandelbrotProgram.vertexPlotPositionAttribute = gl.getAttribLocation(mandelbrotProgram, "aPlotPosition");
+    gl.enableVertexAttribArray(mandelbrotProgram.vertexPlotPositionAttribute);
+  }
+
+
+  var currentProgram;
+  function setCurrentProgram(program) {
+    currentProgram = program;
+    gl.useProgram(program);
   }
 
 
@@ -262,11 +258,8 @@
 
 
   function setMatrixUniforms() {
-    var pUniform = gl.getUniformLocation(mandelbrotProgram, "uPMatrix");
-    gl.uniformMatrix4fv(pUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-
-    var mvUniform = gl.getUniformLocation(mandelbrotProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(mvUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
   }
 
 
@@ -337,7 +330,7 @@
 
 
   MandelbrotCube.prototype.draw = function() {
-    gl.useProgram(mandelbrotProgram);
+    setCurrentProgram(mandelbrotProgram);
     loadIdentity();
 
     mvTranslate([this.xPos, this.yPos, this.zPos])
@@ -347,7 +340,7 @@
     mvRotate(this.zRot, [0, 0, 1]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-    gl.vertexAttribPointer(mandelbrotVertexPosAttr, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(mandelbrotProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     var positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -359,7 +352,7 @@
       positions.push(-2.2 / this.zooms[i] + this.centerOffsetsX[i],  1.2 / this.zooms[i] + this.centerOffsetsY[i])
     }
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(positions), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(mandelbrotPlotPosAttr, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(mandelbrotProgram.vertexPlotPositionAttribute, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
@@ -446,7 +439,7 @@
       4, 5, 6,      4, 6, 7,
       8, 9, 10,     8, 10, 11,
       12, 13, 14,   12, 14, 15,
-      16, 17, 18,   16, 18, 19,
+      16, 17, 18,   16, 18, 19
     ];
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(vertexIndices), gl.STATIC_DRAW);
     boundingBoxVertexIndexBuffer.itemSize = 1;
@@ -520,14 +513,14 @@
       cubes[i].draw();
     }
 
-    gl.useProgram(colorProgram);
+    setCurrentProgram(colorProgram);
     loadIdentity();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, boundingBoxVertexPositionBuffer);
-    gl.vertexAttribPointer(colorVertexPosAttr, boundingBoxVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(colorProgram.vertexPositionAttribute, boundingBoxVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, boundingBoxVertexColorBuffer);
-    gl.vertexAttribPointer(colorVertexColorAttr, boundingBoxVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(colorProgram.vertexColorAttribute, boundingBoxVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boundingBoxVertexIndexBuffer);
     setMatrixUniforms();
@@ -557,7 +550,7 @@
   function webGLStart() {
     var canvas = document.getElementById("example02-canvas");
     initGL(canvas);
-    initShaders();
+    initPrograms();
     initBuffers();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
