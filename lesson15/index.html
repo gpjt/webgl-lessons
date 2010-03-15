@@ -38,7 +38,7 @@
       float specularLightWeighting = 0.0;
       float shininess = 32.0;
       if (uUseSpecularMap) {
-        shininess = texture2D(uSpecularMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t)).r * 255.0;
+        shininess = texture2D(uSpecularMapSampler, vec2(vTextureCoord.s, vTextureCoord.t)).r * 255.0;
       }
       if (shininess < 255.0) {
         vec3 eyeDirection = normalize(-vPosition.xyz);
@@ -55,7 +55,7 @@
 
     vec4 fragmentColor;
     if (uUseColorMap) {
-      fragmentColor = texture2D(uColorMapSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+      fragmentColor = texture2D(uColorMapSampler, vec2(vTextureCoord.s, vTextureCoord.t));
     } else {
       fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
@@ -179,7 +179,7 @@
 
   function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);

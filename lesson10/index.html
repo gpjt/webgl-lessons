@@ -13,7 +13,7 @@
   uniform sampler2D uSampler;
 
   void main(void) {
-    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
   }
 </script>
 
@@ -114,7 +114,7 @@
 
   function handleLoadedTexture(texture) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 

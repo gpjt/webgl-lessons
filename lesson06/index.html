@@ -13,7 +13,7 @@
   uniform sampler2D uSampler;
 
   void main(void) {
-    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, 1.0 - vTextureCoord.t));
+    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
   }
 </script>
 
@@ -115,17 +115,17 @@
 
   function handleLoadedTexture(textures) {
     gl.bindTexture(gl.TEXTURE_2D, textures[0]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, textures[0].image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, textures[0].image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
     gl.bindTexture(gl.TEXTURE_2D, textures[1]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, textures[1].image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, textures[1].image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
     gl.bindTexture(gl.TEXTURE_2D, textures[2]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, textures[2].image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, textures[2].image, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);
