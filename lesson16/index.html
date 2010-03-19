@@ -313,6 +313,32 @@
   }
 
 
+  var rttFramebuffer;
+  var rttTexture;
+  function initTextureFrameBuffer(canvas) {
+    var width = canvas.width;
+    var height = canvas.height;
+
+    rttTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+    var textureStorage = new WebGLUnsignedByteArray(width * height * 4);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureStorage);
+
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, width, height);
+
+    rttFramebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+
   var cubeVertexPositionBuffer;
   var cubeVertexNormalBuffer;
   var cubeVertexTextureCoordBuffer;
@@ -322,6 +348,11 @@
   var moonVertexNormalBuffer;
   var moonVertexTextureCoordBuffer;
   var moonVertexIndexBuffer;
+
+  var laptopScreenVertexPositionBuffer;
+  var laptopScreenVertexNormalBuffer;
+  var laptopScreenVertexTextureCoordBuffer;
+
   function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
@@ -539,13 +570,49 @@
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(indexData), gl.STREAM_DRAW);
     moonVertexIndexBuffer.itemSize = 3;
     moonVertexIndexBuffer.numItems = indexData.length;
+
+    laptopScreenVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
+    vertices = [
+       1.0,  1.0,  0.0,
+      -1.0,  1.0,  0.0,
+       1.0, -1.0,  0.0,
+      -1.0, -1.0,  0.0
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    laptopScreenVertexPositionBuffer.itemSize = 3;
+    laptopScreenVertexPositionBuffer.numItems = 4;
+
+    laptopScreenVertexNormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexNormalBuffer);
+    var vertexNormals = [
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0,
+       0.0,  0.0,  1.0
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
+    laptopScreenVertexNormalBuffer.itemSize = 3;
+    laptopScreenVertexNormalBuffer.numItems = 4;
+
+    laptopScreenVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexTextureCoordBuffer);
+    var textureCoords = [
+      1.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      0.0, 0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
+    laptopScreenVertexTextureCoordBuffer.itemSize = 2;
+    laptopScreenVertexTextureCoordBuffer.numItems = 4;
   }
 
 
   var moonAngle = 180;
   var cubeAngle = 0;
 
-  function drawScene() {
+  function drawSceneOnLaptopScreen() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     perspective(45, 1.0, 0.1, 100.0);
@@ -637,6 +704,48 @@
   }
 
 
+
+  var laptopAngle = 0;
+
+  function drawScene() {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
+    drawSceneOnLaptopScreen();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    perspective(45, 1.0, 0.1, 100.0);
+
+    loadIdentity();
+
+    // No lighting for the screen
+    gl.uniform1i(currentProgram.useLightingUniform, false);
+    mvPushMatrix();
+
+    mvTranslate([0, 0, -5]);
+    mvRotate(laptopAngle, [0, 1, 0]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
+    gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, laptopScreenVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexNormalBuffer);
+    gl.vertexAttribPointer(currentProgram.vertexNormalAttribute, laptopScreenVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(currentProgram.textureCoordAttribute, laptopScreenVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+    gl.uniform1i(currentProgram.samplerUniform, 0);
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, laptopScreenVertexPositionBuffer.numItems);
+
+    mvPopMatrix();
+
+  }
+
+
   var lastTime = 0;
   function animate() {
     var timeNow = new Date().getTime();
@@ -645,6 +754,8 @@
 
       moonAngle += 0.05 * elapsed;
       cubeAngle += 0.05 * elapsed;
+
+      laptopAngle += 0.01 * elapsed;
     }
     lastTime = timeNow;
   }
@@ -660,6 +771,7 @@
   function webGLStart() {
     var canvas = document.getElementById("lesson16-canvas");
     initGL(canvas);
+    initTextureFrameBuffer(canvas);
     initShaders();
     initBuffers();
     initTextures();
