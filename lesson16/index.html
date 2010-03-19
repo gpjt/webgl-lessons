@@ -574,10 +574,10 @@
     laptopScreenVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
     vertices = [
-       1.0,  1.0,  0.0,
-      -1.0,  1.0,  0.0,
-       1.0, -1.0,  0.0,
-      -1.0, -1.0,  0.0
+       0.580687, 0.658584, 0.813106,
+      -0.580687, 0.658584, 0.813107,
+       0.580687, 0.471024, 0.113121,
+      -0.580687, 0.471024, 0.113121,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
     laptopScreenVertexPositionBuffer.itemSize = 3;
@@ -607,6 +607,50 @@
     laptopScreenVertexTextureCoordBuffer.itemSize = 2;
     laptopScreenVertexTextureCoordBuffer.numItems = 4;
   }
+
+
+  var laptopVertexPositionBuffer;
+  var laptopVertexNormalBuffer;
+  var laptopVertexTextureCoordBuffer;
+  var laptopVertexIndexBuffer;
+  function handleLoadedLaptop(laptopData) {
+    laptopVertexNormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexNormalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexNormals), gl.STATIC_DRAW);
+    laptopVertexNormalBuffer.itemSize = 3;
+    laptopVertexNormalBuffer.numItems = laptopData.vertexNormals.length / 3;
+
+    laptopVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexTextureCoords), gl.STATIC_DRAW);
+    laptopVertexTextureCoordBuffer.itemSize = 2;
+    laptopVertexTextureCoordBuffer.numItems = laptopData.vertexTextureCoords.length / 2;
+
+    laptopVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexPositions), gl.STATIC_DRAW);
+    laptopVertexPositionBuffer.itemSize = 3;
+    laptopVertexPositionBuffer.numItems = laptopData.vertexPositions.length / 3;
+
+    laptopVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, laptopVertexIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(laptopData.indices), gl.STREAM_DRAW);
+    laptopVertexIndexBuffer.itemSize = 3;
+    laptopVertexIndexBuffer.numItems = laptopData.indices.length;
+  }
+
+
+  function loadLaptop() {
+    var request = new XMLHttpRequest();
+    request.open("GET", "macbook.json");
+    request.onreadystatechange = function() {
+      if (request.readyState == 4) {
+        handleLoadedLaptop(JSON.parse(request.responseText));
+      }
+    }
+    request.send();
+  }
+
 
 
   var moonAngle = 180;
@@ -718,12 +762,29 @@
 
     loadIdentity();
 
-    // No lighting for the screen
-    gl.uniform1i(currentProgram.useLightingUniform, false);
     mvPushMatrix();
 
-    mvTranslate([0, 0, -5]);
+    mvTranslate([0, -0.5, -2.2]);
     mvRotate(laptopAngle, [0, 1, 0]);
+    mvRotate(-90, [1, 0, 0]);
+
+    gl.uniform1i(currentProgram.useTexturesUniform, false);
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
+    gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, laptopVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(currentProgram.textureCoordAttribute, laptopVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexNormalBuffer);
+    gl.vertexAttribPointer(currentProgram.vertexNormalAttribute, laptopVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, laptopVertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, laptopVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    // No lighting for the screen
+    gl.uniform1i(currentProgram.useLightingUniform, false);
+    gl.uniform1i(currentProgram.useTexturesUniform, true);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
     gl.vertexAttribPointer(currentProgram.vertexPositionAttribute, laptopScreenVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -755,7 +816,7 @@
       moonAngle += 0.05 * elapsed;
       cubeAngle += 0.05 * elapsed;
 
-      laptopAngle += 0.01 * elapsed;
+      laptopAngle -= 0.01 * elapsed;
     }
     lastTime = timeNow;
   }
@@ -775,6 +836,7 @@
     initShaders();
     initBuffers();
     initTextures();
+    loadLaptop();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
