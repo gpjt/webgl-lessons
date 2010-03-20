@@ -13,6 +13,7 @@
   varying vec4 vPosition;
 
   uniform float uMaterialShininess;
+  uniform vec3 uMaterialSpecularColor;
 
   uniform bool uShowSpecularHighlights;
   uniform bool uUseLighting;
@@ -28,25 +29,25 @@
 
 
   void main(void) {
-    vec3 lightWeighting;
-    if (!uUseLighting) {
-      lightWeighting = vec3(1.0, 1.0, 1.0);
-    } else {
+    vec3 ambientLightWeighting = vec3(1.0, 1.0, 1.0);
+    vec3 diffuseLightWeighting = vec3(0.0, 0.0, 0.0);
+    vec3 specularLightWeighting = vec3(0.0, 0.0, 0.0);
+    if (uUseLighting) {
+      ambientLightWeighting = uAmbientColor;
+
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
       vec3 normal = normalize(vTransformedNormal.xyz);
 
-      float specularLightWeighting = 0.0;
       if (uShowSpecularHighlights) {
         vec3 eyeDirection = normalize(-vPosition.xyz);
         vec3 reflectionDirection = reflect(-lightDirection, normal);
 
-        specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
+        float specularLightBrightness = pow(max(dot(reflectionDirection, eyeDirection), 0.0), uMaterialShininess);
+        specularLightWeighting = uPointLightingSpecularColor * specularLightBrightness;
       }
 
-      float diffuseLightWeighting = max(dot(normal, lightDirection), 0.0);
-      lightWeighting = uAmbientColor
-        + uPointLightingSpecularColor * specularLightWeighting
-        + uPointLightingDiffuseColor * diffuseLightWeighting;
+      float diffuseLightBrightness = max(dot(normal, lightDirection), 0.0);
+      diffuseLightWeighting = uPointLightingDiffuseColor * diffuseLightBrightness;
     }
 
     vec4 fragmentColor;
@@ -55,7 +56,7 @@
     } else {
       fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
-    gl_FragColor = vec4(fragmentColor.rgb * lightWeighting, fragmentColor.a);
+    gl_FragColor = vec4(fragmentColor.rgb * ambientLightWeighting + fragmentColor.rgb * diffuseLightWeighting + uMaterialSpecularColor * specularLightWeighting, fragmentColor.a);
   }
 </script>
 
@@ -162,6 +163,7 @@
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
+    shaderProgram.materialSpecularColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialSpecularColor");
     shaderProgram.showSpecularHighlightsUniform = gl.getUniformLocation(shaderProgram, "uShowSpecularHighlights");
     shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
@@ -542,10 +544,10 @@
     laptopScreenVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexNormalBuffer);
     var vertexNormals = [
-       0.0,  0.0,  1.0,
-       0.0,  0.0,  1.0,
-       0.0,  0.0,  1.0,
-       0.0,  0.0,  1.0
+      0.000000, -0.965926, 0.258819,
+      0.000000, -0.965926, 0.258819,
+      0.000000, -0.965926, 0.258819,
+      0.000000, -0.965926, 0.258819,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
     laptopScreenVertexNormalBuffer.itemSize = 3;
@@ -618,6 +620,7 @@
     perspective(45, laptopScreenAspectRatio, 0.1, 100.0);
 
     gl.uniform1i(shaderProgram.useLightingUniform, true);
+    gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, false);
     gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
     gl.uniform3f(shaderProgram.pointLightingLocationUniform, 0, 0, -5);
     gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
@@ -698,14 +701,15 @@
 
     gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, true);
     gl.uniform1i(shaderProgram.useLightingUniform, true);
+    gl.uniform3f(shaderProgram.pointLightingLocationUniform, -1, 2, -1);
 
     gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
-    gl.uniform3f(shaderProgram.pointLightingLocationUniform, -1, 2, -1);
     gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
-    gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform, 1, 1, 1);
+    gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform, 0.8, 0.8, 0.8);
 
-    // The laptop body is quite shiny and has no texture
-    gl.uniform1f(shaderProgram.materialShininessUniform, 20);
+    // The laptop body is quite shiny and has no texture.  It reflects lots of specular light
+    gl.uniform1f(shaderProgram.materialShininessUniform, 5);
+    gl.uniform3f(shaderProgram.materialSpecularColorUniform, 1.5, 1.5, 1.5);
     gl.uniform1i(shaderProgram.useTexturesUniform, false);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
@@ -722,11 +726,13 @@
     gl.drawElements(gl.TRIANGLES, laptopVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     // No lighting for the screen
-    // The laptop screen is *very* shiny, has a texture (the image being shown on it) and but does not use the point light:
-    // ambient light of 1.0, 1.0, 1.0, makes it look like it's emitting light.
+    // The laptop screen is *very* reflective, has a texture (the image being shown on it) and but does not use the point light:
+    // ambient light of 1.5, 1.5, 1.5, makes it look like it is emitting light, and a lower brightness of specular color
+    // stops the specular reflection from being too overwhelming.
     gl.uniform1f(shaderProgram.materialShininessUniform, 20);
+    gl.uniform3f(shaderProgram.materialSpecularColorUniform, 0.5, 0.5, 0.5);
     gl.uniform1i(shaderProgram.useTexturesUniform, true);
-    gl.uniform3f(shaderProgram.ambientColorUniform, 1, 1, 1);
+    gl.uniform3f(shaderProgram.ambientColorUniform, 1.5, 1.5, 1.5);
     gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
@@ -759,7 +765,7 @@
       moonAngle += 0.05 * elapsed;
       cubeAngle += 0.05 * elapsed;
 
-      laptopAngle -= 0.01 * elapsed;
+      laptopAngle -= 0.005 * elapsed;
     }
     lastTime = timeNow;
   }
