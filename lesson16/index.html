@@ -678,6 +678,13 @@
     mvRotate(-90, [1, 0, 0]);
 
     gl.uniform1i(shaderProgram.useTexturesUniform, false);
+
+    gl.uniform1i(shaderProgram.useLightingUniform, true);
+    gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
+    gl.uniform3f(shaderProgram.pointLightingLocationUniform, -1, 1, -1);
+    gl.uniform3f(shaderProgram.pointLightingColorUniform, 0.8, 0.8, 0.8);
+
+
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, laptopVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
