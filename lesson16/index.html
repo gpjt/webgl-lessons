@@ -161,11 +161,14 @@
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+    shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
+    shaderProgram.showSpecularHighlightsUniform = gl.getUniformLocation(shaderProgram, "uShowSpecularHighlights");
     shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
     shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
     shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
-    shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingDiffuseColor");
+    shaderProgram.pointLightingDiffuseColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingDiffuseColor");
+    shaderProgram.pointLightingSpecularColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingSpecularColor");
 
     gl.useProgram(shaderProgram);
   }
@@ -617,8 +620,9 @@
     gl.uniform1i(shaderProgram.useLightingUniform, true);
     gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
     gl.uniform3f(shaderProgram.pointLightingLocationUniform, 0, 0, -5);
-    gl.uniform3f(shaderProgram.pointLightingColorUniform, 0.8, 0.8, 0.8);
+    gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
 
+    gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, false);
     gl.uniform1i(shaderProgram.useTexturesUniform, true);
 
     loadIdentity();
@@ -692,13 +696,17 @@
     mvRotate(laptopAngle, [0, 1, 0]);
     mvRotate(-90, [1, 0, 0]);
 
-    gl.uniform1i(shaderProgram.useTexturesUniform, false);
-
+    gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, true);
     gl.uniform1i(shaderProgram.useLightingUniform, true);
-    gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
-    gl.uniform3f(shaderProgram.pointLightingLocationUniform, -1, 1, -1);
-    gl.uniform3f(shaderProgram.pointLightingColorUniform, 0.8, 0.8, 0.8);
 
+    gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
+    gl.uniform3f(shaderProgram.pointLightingLocationUniform, -1, 2, -1);
+    gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0.8, 0.8, 0.8);
+    gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform, 1, 1, 1);
+
+    // The laptop body is quite shiny and has no texture
+    gl.uniform1f(shaderProgram.materialShininessUniform, 20);
+    gl.uniform1i(shaderProgram.useTexturesUniform, false);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, laptopVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -714,8 +722,12 @@
     gl.drawElements(gl.TRIANGLES, laptopVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     // No lighting for the screen
-    gl.uniform1i(shaderProgram.useLightingUniform, false);
+    // The laptop screen is *very* shiny, has a texture (the image being shown on it) and but does not use the point light:
+    // ambient light of 1.0, 1.0, 1.0, makes it look like it's emitting light.
+    gl.uniform1f(shaderProgram.materialShininessUniform, 20);
     gl.uniform1i(shaderProgram.useTexturesUniform, true);
+    gl.uniform3f(shaderProgram.ambientColorUniform, 1, 1, 1);
+    gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform, 0, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopScreenVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, laptopScreenVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
