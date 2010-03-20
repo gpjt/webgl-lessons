@@ -313,11 +313,13 @@
   }
 
 
+  var laptopScreenAspectRatio = 1.66;
+
   var rttFramebuffer;
   var rttTexture;
   function initTextureFrameBuffer(canvas) {
     var width = canvas.width;
-    var height = canvas.height;
+    var height = Math.round(canvas.width / laptopScreenAspectRatio);
 
     rttTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, rttTexture);
@@ -659,7 +661,7 @@
   function drawSceneOnLaptopScreen() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    perspective(45, 1.0, 0.1, 100.0);
+    perspective(45, laptopScreenAspectRatio, 0.1, 100.0);
 
     var perFragmentLighting = document.getElementById("per-fragment").checked;
     if (perFragmentLighting) {
