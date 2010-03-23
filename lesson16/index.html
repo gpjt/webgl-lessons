@@ -273,9 +273,9 @@
 
   var rttFramebuffer;
   var rttTexture;
-  function initTextureFrameBuffer(canvas) {
-    var width = canvas.width;
-    var height = Math.round(canvas.width / laptopScreenAspectRatio);
+  function initTextureFrameBuffer() {
+    var width = 512;
+    var height = 512;
 
     rttTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, rttTexture);
@@ -789,7 +789,7 @@
   function webGLStart() {
     var canvas = document.getElementById("lesson16-canvas");
     initGL(canvas);
-    initTextureFrameBuffer(canvas);
+    initTextureFrameBuffer();
     initShaders();
     initBuffers();
     initTextures();
