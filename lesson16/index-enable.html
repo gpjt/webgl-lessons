@@ -628,6 +628,7 @@
   function drawSceneOnLaptopScreen() {
     gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.TEXTURE_2D);
 
     perspective(45, laptopScreenAspectRatio, 0.1, 100.0);
 
@@ -703,7 +704,8 @@
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     gl.viewport(0, 0, viewportWidth, viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.TEXTURE_2D);
 
     perspective(45, 1.0, 0.1, 100.0);
 
