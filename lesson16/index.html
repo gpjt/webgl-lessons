@@ -821,6 +821,9 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
+    // This should not be required, but some machines will not show textures without it:
+    gl.enable(gl.TEXTURE_2D)
+
     setInterval(tick, 15);
   }
 
