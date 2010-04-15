@@ -293,7 +293,7 @@
     teapotVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(teapotData.indices), gl.STREAM_DRAW);
-    teapotVertexIndexBuffer.itemSize = 3;
+    teapotVertexIndexBuffer.itemSize = 1;
     teapotVertexIndexBuffer.numItems = teapotData.indices.length;
 
     document.getElementById("loadingtext").textContent = "";

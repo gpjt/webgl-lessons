@@ -345,7 +345,7 @@
     sphereVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(indexData), gl.STREAM_DRAW);
-    sphereVertexIndexBuffer.itemSize = 3;
+    sphereVertexIndexBuffer.itemSize = 1;
     sphereVertexIndexBuffer.numItems = indexData.length;
   }
 
