@@ -87,7 +87,8 @@
   function initGL(canvas) {
     try {
       gl = canvas.getContext("experimental-webgl");
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
     } catch(e) {
     }
     if (!gl) {
@@ -189,7 +190,8 @@
       [-2.2, -1.2],
   ];
   function drawScene() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     gl.vertexAttribPointer(aVertexPosition, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
