@@ -59,7 +59,8 @@
   function initGL(canvas) {
     try {
       gl = canvas.getContext("experimental-webgl");
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
     } catch(e) {
     }
     if (!gl) {
@@ -347,9 +348,10 @@
 
 
   function drawScene() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspective(45, 1.0, 0.1, 100.0);
+    perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
