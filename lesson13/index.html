@@ -80,14 +80,16 @@
 
 
   void main(void) {
-    vec3 lightWeighting;
-    if (!uUseLighting) {
-      lightWeighting = vec3(1.0, 1.0, 1.0);
-    } else {
-      vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
+    vec3 ambientLightWeighting = vec3(1.0, 1.0, 1.0);
+    vec3 diffuseLightWeighting = vec3(0.0, 0.0, 0.0);
+    if (uUseLighting) {
+      ambientLightWeighting = uAmbientColor;
 
-      float directionalLightWeighting = max(dot(normalize(vTransformedNormal.xyz), lightDirection), 0.0);
-      lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+      vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
+      vec3 normal = normalize(vTransformedNormal.xyz);
+
+      float diffuseLightBrightness = max(dot(normal, lightDirection), 0.0);
+      diffuseLightWeighting = uPointLightingColor * diffuseLightBrightness;
     }
 
     vec4 fragmentColor;
@@ -96,7 +98,7 @@
     } else {
       fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
-    gl_FragColor = vec4(fragmentColor.rgb * lightWeighting, fragmentColor.a);
+    gl_FragColor = vec4(fragmentColor.rgb * ambientLightWeighting + fragmentColor.rgb * diffuseLightWeighting, fragmentColor.a);
   }
 </script>
 
