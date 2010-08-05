@@ -6,6 +6,10 @@
 
 
 <script id="shader-fs" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
   uniform vec4 uColor;
 
   varying float vLifetime;

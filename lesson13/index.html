@@ -8,6 +8,10 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="per-vertex-lighting-fs" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
   varying vec2 vTextureCoord;
   varying vec3 vLightWeighting;
 
@@ -64,6 +68,10 @@
 
 
 <script id="per-fragment-lighting-fs" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
   varying vec2 vTextureCoord;
   varying vec4 vTransformedNormal;
   varying vec4 vPosition;

@@ -8,9 +8,13 @@
 <script type="text/javascript" src="glUtils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+
+  void main(void) {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
