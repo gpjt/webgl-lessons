@@ -180,7 +180,7 @@
          1.0, -1.0,
         -1.0, -1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPositionBuffer.itemSize = 2;
     vertexPositionBuffer.numItems = 4;
   }
@@ -212,7 +212,7 @@
       corners.push(y / zoom + centerOffsetY);
     }
 
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(corners), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(corners), gl.STATIC_DRAW);
     gl.vertexAttribPointer(aPlotPosition, 2, gl.FLOAT, false, 0, 0);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

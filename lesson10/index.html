@@ -188,8 +188,8 @@
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
   }
 
 
@@ -277,13 +277,13 @@
 
     worldVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexPositions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW);
     worldVertexPositionBuffer.itemSize = 3;
     worldVertexPositionBuffer.numItems = vertexCount;
 
     worldVertexTextureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexTextureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexTextureCoords), gl.STATIC_DRAW);
     worldVertexTextureCoordBuffer.itemSize = 2;
     worldVertexTextureCoordBuffer.numItems = vertexCount;
 

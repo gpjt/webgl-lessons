@@ -191,8 +191,8 @@
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
   }
 
 
@@ -246,7 +246,7 @@
       -1.0,  1.0,  0.0,
        1.0,  1.0,  0.0
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     starVertexPositionBuffer.itemSize = 3;
     starVertexPositionBuffer.numItems = 4;
 
@@ -258,7 +258,7 @@
       0.0, 1.0,
       1.0, 1.0
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
     starVertexTextureCoordBuffer.itemSize = 2;
     starVertexTextureCoordBuffer.numItems = 4;
   }

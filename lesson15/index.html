@@ -267,12 +267,12 @@
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
 
     var normalMatrix = mvMatrix.inverse();
     normalMatrix = normalMatrix.transpose();
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new Float32Array(normalMatrix.flatten()));
   }
 
 
@@ -332,25 +332,25 @@
 
     sphereVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(normalData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
     sphereVertexNormalBuffer.itemSize = 3;
     sphereVertexNormalBuffer.numItems = normalData.length / 3;
 
     sphereVertexTextureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoordData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
     sphereVertexTextureCoordBuffer.itemSize = 2;
     sphereVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
 
     sphereVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexPositionData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
     sphereVertexPositionBuffer.itemSize = 3;
     sphereVertexPositionBuffer.numItems = vertexPositionData.length / 3;
 
     sphereVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(indexData), gl.STREAM_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STREAM_DRAW);
     sphereVertexIndexBuffer.itemSize = 1;
     sphereVertexIndexBuffer.numItems = indexData.length;
   }

@@ -279,12 +279,12 @@
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
 
     var normalMatrix = mvMatrix.inverse();
     normalMatrix = normalMatrix.transpose();
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new WebGLFloatArray(normalMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new Float32Array(normalMatrix.flatten()));
   }
 
 
@@ -378,7 +378,7 @@
       -1.0,  1.0,  1.0,
       -1.0,  1.0, -1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     cubeVertexPositionBuffer.itemSize = 3;
     cubeVertexPositionBuffer.numItems = 24;
 
@@ -421,7 +421,7 @@
       -1.0,  0.0,  0.0,
       -1.0,  0.0,  0.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
     cubeVertexNormalBuffer.itemSize = 3;
     cubeVertexNormalBuffer.numItems = 24;
 
@@ -464,7 +464,7 @@
       1.0, 1.0,
       0.0, 1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
     cubeVertexTextureCoordBuffer.itemSize = 2;
     cubeVertexTextureCoordBuffer.numItems = 24;
 
@@ -478,7 +478,7 @@
       16, 17, 18,   16, 18, 19, // Right face
       20, 21, 22,   20, 22, 23  // Left face
     ]
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(cubeVertexIndices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
     cubeVertexIndexBuffer.itemSize = 1;
     cubeVertexIndexBuffer.numItems = 36;
 
@@ -534,25 +534,25 @@
 
     moonVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(normalData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
     moonVertexNormalBuffer.itemSize = 3;
     moonVertexNormalBuffer.numItems = normalData.length / 3;
 
     moonVertexTextureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoordData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
     moonVertexTextureCoordBuffer.itemSize = 2;
     moonVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
 
     moonVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, moonVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexPositionData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
     moonVertexPositionBuffer.itemSize = 3;
     moonVertexPositionBuffer.numItems = vertexPositionData.length / 3;
 
     moonVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, moonVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(indexData), gl.STREAM_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STREAM_DRAW);
     moonVertexIndexBuffer.itemSize = 1;
     moonVertexIndexBuffer.numItems = indexData.length;
 
@@ -564,7 +564,7 @@
        0.580687, 0.472, 0.113121,
       -0.580687, 0.472, 0.113121,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     laptopScreenVertexPositionBuffer.itemSize = 3;
     laptopScreenVertexPositionBuffer.numItems = 4;
 
@@ -576,7 +576,7 @@
       0.000000, -0.965926, 0.258819,
       0.000000, -0.965926, 0.258819,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertexNormals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
     laptopScreenVertexNormalBuffer.itemSize = 3;
     laptopScreenVertexNormalBuffer.numItems = 4;
 
@@ -588,7 +588,7 @@
       1.0, 0.0,
       0.0, 0.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
     laptopScreenVertexTextureCoordBuffer.itemSize = 2;
     laptopScreenVertexTextureCoordBuffer.numItems = 4;
   }
@@ -601,25 +601,25 @@
   function handleLoadedLaptop(laptopData) {
     laptopVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexNormals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(laptopData.vertexNormals), gl.STATIC_DRAW);
     laptopVertexNormalBuffer.itemSize = 3;
     laptopVertexNormalBuffer.numItems = laptopData.vertexNormals.length / 3;
 
     laptopVertexTextureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexTextureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(laptopData.vertexTextureCoords), gl.STATIC_DRAW);
     laptopVertexTextureCoordBuffer.itemSize = 2;
     laptopVertexTextureCoordBuffer.numItems = laptopData.vertexTextureCoords.length / 2;
 
     laptopVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, laptopVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(laptopData.vertexPositions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(laptopData.vertexPositions), gl.STATIC_DRAW);
     laptopVertexPositionBuffer.itemSize = 3;
     laptopVertexPositionBuffer.numItems = laptopData.vertexPositions.length / 3;
 
     laptopVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, laptopVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(laptopData.indices), gl.STREAM_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(laptopData.indices), gl.STREAM_DRAW);
     laptopVertexIndexBuffer.itemSize = 1;
     laptopVertexIndexBuffer.numItems = laptopData.indices.length;
   }

@@ -161,8 +161,8 @@
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new WebGLFloatArray(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new WebGLFloatArray(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
   }
 
 
@@ -178,7 +178,7 @@
         -1.0, -1.0,  0.0,
          1.0, -1.0,  0.0
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     triangleVertexPositionBuffer.itemSize = 3;
     triangleVertexPositionBuffer.numItems = 3;
 
@@ -189,7 +189,7 @@
         0.0, 1.0, 0.0, 1.0,
         0.0, 0.0, 1.0, 1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(colors), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     triangleVertexColorBuffer.itemSize = 4;
     triangleVertexColorBuffer.numItems = 3;
 
@@ -202,7 +202,7 @@
          1.0, -1.0,  0.0,
         -1.0, -1.0,  0.0
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     squareVertexPositionBuffer.itemSize = 3;
     squareVertexPositionBuffer.numItems = 4;
 
@@ -212,7 +212,7 @@
     for (var i=0; i < 4; i++) {
       colors = colors.concat([0.5, 0.5, 1.0, 1.0]);
     }
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(colors), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     squareVertexColorBuffer.itemSize = 4;
     squareVertexColorBuffer.numItems = 4;
   }

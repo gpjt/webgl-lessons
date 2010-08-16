@@ -229,31 +229,31 @@
 
     pointLifetimesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pointLifetimesBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(lifetimes), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lifetimes), gl.STATIC_DRAW);
     pointLifetimesBuffer.itemSize = 1;
     pointLifetimesBuffer.numItems = numParticles * 6;
 
     pointStartPositionsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pointStartPositionsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(startPositions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(startPositions), gl.STATIC_DRAW);
     pointStartPositionsBuffer.itemSize = 3;
     pointStartPositionsBuffer.numItems = numParticles * 6;
 
     pointEndPositionsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pointEndPositionsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(endPositions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(endPositions), gl.STATIC_DRAW);
     pointEndPositionsBuffer.itemSize = 3;
     pointEndPositionsBuffer.numItems = numParticles * 6;
 
     pointOffsetsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pointOffsetsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(offsets), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(offsets), gl.STATIC_DRAW);
     pointOffsetsBuffer.itemSize = 2;
     pointOffsetsBuffer.numItems = numParticles * 6;
 
     pointTextureCoordsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pointTextureCoordsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(textureCoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
     pointTextureCoordsBuffer.itemSize = 2;
     pointTextureCoordsBuffer.numItems = numParticles * 6;
   }
