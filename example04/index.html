@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <title>Learning WebGL &mdash; JSON demo using Dirigible</title>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+    <script language="JavaScript" type="text/javascript" src="jquery-1.4.2.min.js"></script>
+    <script language="JavaScript" type="text/javascript">
+
+var json_url = "http://www.projectdirigible.com/user/giles/sheet/431/v0.1/json/"
+
+
+function handle_response(data) {
+    $("#id_status").html("Orbital data received, processing");
+
+    var rows = []
+    for (var col = 1; col < 11; col++) {
+        var cells = data[col];
+        for (var cellIndex in cells) {
+            cellIndex = parseInt(cellIndex);
+            if (!rows[cellIndex - 1]) {
+                rows[cellIndex - 1] = []
+            }
+            rows[cellIndex - 1].push(cells[cellIndex]);
+        }
+    }
+
+    for (var rowIndex in rows) {
+
+        var $tr = $("<tr></tr>");
+
+        for (var colIndex in rows[rowIndex]) {
+            var value = rows[rowIndex][colIndex];
+            var $content;
+            if (colIndex == 0 || rowIndex == 0) {
+                $content = $("<b>" + value + "</b>");
+            } else {
+                $content = $("<input>");
+                $content.attr("value", value);
+            }
+            var $td = $("<td></td>");
+            $td.append($content)
+            $tr.append($td);
+        }
+
+        $('#id_data_table > tbody:last').append($tr);
+
+    }
+
+    $("#id_status").html("Orbital data loaded");
+}
+
+
+function json_request(overrides) {
+    if (window.XDomainRequest) {
+        // For IE
+        xdr = new XDomainRequest();
+        if (xdr) {
+            xdr.onload = function() {
+                handle_response( $.parseJSON( xdr.responseText ) );
+            };
+            xdr.open('get', json_url + '?' + $.param(overrides));
+            xdr.send();
+        }
+    } else {
+        // For everyone else
+        $.getJSON(json_url, overrides, handle_response);
+    }
+
+}
+
+
+
+function handle_get_data() {
+    $("#id_status").html("Loading data...");
+    $("#id_data_table").html("<tbody></tbody>");
+    json_request({})
+}
+
+
+function init() {
+}
+
+
+$(init);
+
+    </script>
+
+</head>
+
+
+<body>
+
+    <table id="id_data_table">
+    </table>
+
+    <input type="button" onclick="handle_get_data();" value="Update" />
+    <div id="id_status"></div>
+
+
+</body>
+
+</html>
