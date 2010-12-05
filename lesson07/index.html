@@ -468,10 +468,7 @@
       ]);
       var adjustedLD = lightingDirection.toUnitVector().x(-1);
       var flatLD = adjustedLD.flatten();
-      gl.uniform3f(
-        shaderProgram.lightingDirectionUniform,
-        flatLD[0], flatLD[1], flatLD[2]
-      );
+      gl.uniform3fv(shaderProgram.lightingDirectionUniform, flatLD);
 
       gl.uniform3f(
         shaderProgram.directionalColorUniform,
