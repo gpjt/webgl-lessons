@@ -459,7 +459,7 @@
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
       gl.enable(gl.BLEND);
       gl.disable(gl.DEPTH_TEST);
-      gl.uniform1f(shaderProgram.alphaUniform, document.getElementById("alpha").value);
+      gl.uniform1f(shaderProgram.alphaUniform, parseFloat(document.getElementById("alpha").value));
     } else {
       gl.disable(gl.BLEND);
       gl.enable(gl.DEPTH_TEST);
