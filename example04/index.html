@@ -13,11 +13,19 @@
         varying vec2 vTextureCoord;
         varying vec3 vLightWeighting;
 
+        uniform bool uUseTexture;
+
+        uniform vec4 uMaterialColor;
         uniform sampler2D uSampler;
 
         void main(void) {
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-            gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+            vec4 fragColor;
+            if (uUseTexture) {
+                fragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            } else {
+                fragColor = uMaterialColor;
+            }
+            gl_FragColor = vec4(fragColor.rgb * vLightWeighting, fragColor.a);
         }
     </script>
 
@@ -249,6 +257,8 @@
         shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
         shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
         shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
+        shaderProgram.useTextureUniform = gl.getUniformLocation(shaderProgram, "uUseTexture");
+        shaderProgram.materialColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialColor");
     }
 
 
@@ -405,6 +415,7 @@
 
         loadIdentity();
         mvTranslate([0, 0, -1000000000.0]);
+        gl.uniform3i(shaderProgram.useTextureUniform, 0);
 
         for (planetIndex in planets) {
             mvPushMatrix();
@@ -426,6 +437,8 @@
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
             setMatrixUniforms();
+
+            gl.uniform4f(shaderProgram.materialColorUniform, planet.r, planet.g, planet.b, 1.0)
 
             gl.drawElements(gl.TRIANGLES, sphereVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
