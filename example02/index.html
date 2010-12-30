@@ -67,18 +67,17 @@
     float tempX = 0.0;
     int i = 0;
     int runaway = 0;
-    do {
+    for (int i=0; i < 100; i++) {
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (x * x + y * y > 50.0) {
-        runaway = 1;
+      if (x * x + y * y > 100.0) {
+        runaway = i;
       }
-      i ++;
-    } while (i < 100 && runaway == 0);
+    }
 
-    if (runaway == 1) {
-      hue = float(i) / 200.0;
+    if (runaway != 0) {
+      hue = float(runaway) / 200.0;
       saturation = 0.6;
       value = 1.0;
 
