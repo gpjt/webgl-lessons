@@ -35,7 +35,7 @@
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (x * x + y * y > 100.0) {
+      if (runaway == 0 && x * x + y * y > 100.0) {
         runaway = i;
       }
     }
