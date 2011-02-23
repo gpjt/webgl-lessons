@@ -4,8 +4,7 @@
 <title>Learning WebGL &mdash; lesson 11</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="sylvester.js"></script>
-<script type="text/javascript" src="glUtils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -169,16 +168,14 @@
   }
 
 
-  var mvMatrix;
+  var mvMatrix = mat4.create();
   var mvMatrixStack = [];
+  var pMatrix = mat4.create();
 
-  function mvPushMatrix(m) {
-    if (m) {
-      mvMatrixStack.push(m.dup());
-      mvMatrix = m.dup();
-    } else {
-      mvMatrixStack.push(mvMatrix.dup());
-    }
+  function mvPushMatrix() {
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
+    mvMatrixStack.push(copy);
   }
 
   function mvPopMatrix() {
@@ -186,49 +183,22 @@
       throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();
-    return mvMatrix;
-  }
-
-  function loadIdentity() {
-    mvMatrix = Matrix.I(4);
-  }
-
-
-  function multMatrix(m) {
-    mvMatrix = mvMatrix.x(m);
-  }
-
-
-  function mvTranslate(v) {
-    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-
-  function createRotationMatrix(angle, v) {
-    var arad = angle * Math.PI / 180.0;
-    return Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
-  }
-
-
-  function mvRotate(angle, v) {
-    multMatrix(createRotationMatrix(angle, v));
-  }
-
-
-  var pMatrix;
-  function perspective(fovy, aspect, znear, zfar) {
-    pMatrix = makePerspective(fovy, aspect, znear, zfar);
   }
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-    var normalMatrix = mvMatrix.inverse();
-    normalMatrix = normalMatrix.transpose();
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new Float32Array(normalMatrix.flatten()));
+    var normalMatrix = mat4.create();
+    mat4.inverse(mvMatrix, normalMatrix);
+    mat4.transpose(normalMatrix);
+    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+  }
+
+
+  function degToRad(degrees) {
+    return degrees * Math.PI / 180;
   }
 
 
@@ -236,7 +206,8 @@
   var lastMouseX = null;
   var lastMouseY = null;
 
-  var moonRotationMatrix = Matrix.I(4);
+  var moonRotationMatrix = mat4.create();
+  mat4.identity(moonRotationMatrix);
 
   function handleMouseDown(event) {
     mouseDown = true;
@@ -258,12 +229,14 @@
     var newY = event.clientY;
 
     var deltaX = newX - lastMouseX
-    var newRotationMatrix = createRotationMatrix(deltaX / 10, [0, 1, 0]);
+    var newRotationMatrix = mat4.create();
+    mat4.identity(newRotationMatrix);
+    mat4.rotate(newRotationMatrix, degToRad(deltaX / 10), [0, 1, 0]);
 
     var deltaY = newY - lastMouseY;
-    newRotationMatrix = newRotationMatrix.x(createRotationMatrix(deltaY / 10, [1, 0, 0]));
+    mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1, 0, 0]);
 
-    moonRotationMatrix = newRotationMatrix.x(moonRotationMatrix);
+    mat4.multiply(newRotationMatrix, moonRotationMatrix, moonRotationMatrix);
 
     lastMouseX = newX
     lastMouseY = newY;
@@ -356,7 +329,7 @@
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
@@ -368,17 +341,16 @@
         parseFloat(document.getElementById("ambientB").value)
       );
 
-      var lightingDirection = Vector.create([
+
+      var lightingDirection = [
         parseFloat(document.getElementById("lightDirectionX").value),
         parseFloat(document.getElementById("lightDirectionY").value),
         parseFloat(document.getElementById("lightDirectionZ").value)
-      ]);
-      var adjustedLD = lightingDirection.toUnitVector().x(-1);
-      var flatLD = adjustedLD.flatten();
-      gl.uniform3f(
-        shaderProgram.lightingDirectionUniform,
-        flatLD[0], flatLD[1], flatLD[2]
-      );
+      ];
+      var adjustedLD = vec3.create();
+      vec3.normalize(lightingDirection, adjustedLD);
+      vec3.scale(adjustedLD, -1);
+      gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
 
       gl.uniform3f(
         shaderProgram.directionalColorUniform,
@@ -388,11 +360,11 @@
       );
     }
 
-    loadIdentity();
+    mat4.identity(mvMatrix);
 
-    mvTranslate([0, 0, -6]);
+    mat4.translate(mvMatrix, [0, 0, -6]);
 
-    multMatrix(moonRotationMatrix);
+    mat4.multiply(mvMatrix, moonRotationMatrix);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
