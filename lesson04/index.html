@@ -4,8 +4,7 @@
 <title>Learning WebGL &mdash; lesson 4</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="sylvester.js"></script>
-<script type="text/javascript" src="glUtils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -114,16 +113,14 @@
   }
 
 
-  var mvMatrix;
+  var mvMatrix = mat4.create();
   var mvMatrixStack = [];
+  var pMatrix = mat4.create();
 
-  function mvPushMatrix(m) {
-    if (m) {
-      mvMatrixStack.push(m.dup());
-      mvMatrix = m.dup();
-    } else {
-      mvMatrixStack.push(mvMatrix.dup());
-    }
+  function mvPushMatrix() {
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
+    mvMatrixStack.push(copy);
   }
 
   function mvPopMatrix() {
@@ -131,38 +128,17 @@
       throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();
-    return mvMatrix;
-  }
-
-  function loadIdentity() {
-    mvMatrix = Matrix.I(4);
-  }
-
-
-  function multMatrix(m) {
-    mvMatrix = mvMatrix.x(m);
-  }
-
-  function mvTranslate(v) {
-    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-  function mvRotate(ang, v) {
-    var arad = ang * Math.PI / 180.0;
-    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-  var pMatrix;
-  function perspective(fovy, aspect, znear, zfar) {
-    pMatrix = makePerspective(fovy, aspect, znear, zfar);
   }
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+  }
+
+
+  function degToRad(degrees) {
+    return (degrees * 2 * Math.PI) / 360
   }
 
 
@@ -307,13 +283,14 @@
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    loadIdentity();
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
-    mvTranslate([-1.5, 0.0, -8.0])
+    mat4.identity(mvMatrix);
+
+    mat4.translate(mvMatrix, [-1.5, 0.0, -8.0]);
 
     mvPushMatrix();
-    mvRotate(rPyramid, [0, 1, 0]);
+    mat4.rotate(mvMatrix, degToRad(rPyramid), [0, 1, 0]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, pyramidVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -327,10 +304,10 @@
     mvPopMatrix();
 
 
-    mvTranslate([3.0, 0.0, 0.0])
+    mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
 
     mvPushMatrix();
-    mvRotate(rCube, [1, 1, 1]);
+    mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
