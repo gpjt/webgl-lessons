@@ -4,8 +4,7 @@
 <title>Learning WebGL &mdash; lesson 15</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="sylvester.js"></script>
-<script type="text/javascript" src="glUtils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
 
 
 <script id="per-fragment-lighting-fs" type="x-shader/x-fragment">
@@ -213,16 +212,15 @@
   }
 
 
-  var mvMatrix;
-  var mvMatrixStack = [];
 
-  function mvPushMatrix(m) {
-    if (m) {
-      mvMatrixStack.push(m.dup());
-      mvMatrix = m.dup();
-    } else {
-      mvMatrixStack.push(mvMatrix.dup());
-    }
+  var mvMatrix = mat4.create();
+  var mvMatrixStack = [];
+  var pMatrix = mat4.create();
+
+  function mvPushMatrix() {
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
+    mvMatrixStack.push(copy);
   }
 
   function mvPopMatrix() {
@@ -230,49 +228,20 @@
       throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();
-    return mvMatrix;
   }
-
-  function loadIdentity() {
-    mvMatrix = Matrix.I(4);
-  }
-
-
-  function multMatrix(m) {
-    mvMatrix = mvMatrix.x(m);
-  }
-
-
-  function mvTranslate(v) {
-    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-
-  function createRotationMatrix(angle, v) {
-    var arad = angle * Math.PI / 180.0;
-    return Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
-  }
-
-
-  function mvRotate(angle, v) {
-    multMatrix(createRotationMatrix(angle, v));
-  }
-
-
-  var pMatrix;
-  function perspective(fovy, aspect, znear, zfar) {
-    pMatrix = makePerspective(fovy, aspect, znear, zfar);
-  }
-
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-    var normalMatrix = mvMatrix.inverse();
-    normalMatrix = normalMatrix.transpose();
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, new Float32Array(normalMatrix.flatten()));
+    var normalMatrix = mat4.create();
+    mat4.inverse(mvMatrix, normalMatrix);
+    mat4.transpose(normalMatrix);
+    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+  }
+
+  function degToRad(degrees) {
+    return degrees * Math.PI / 180;
   }
 
 
@@ -362,7 +331,7 @@
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var useColorMap = document.getElementById("color-map").checked;
     gl.uniform1i(shaderProgram.useColorMapUniform, useColorMap);
@@ -402,11 +371,11 @@
       );
     }
 
-    loadIdentity();
+    mat4.identity(mvMatrix);
 
-    mvTranslate([0, 0, -40]);
-    mvRotate(23.4, [1, 0, -1]);
-    mvRotate(earthAngle, [0, 1, 0]);
+    mat4.translate(mvMatrix, [0, 0, -40]);
+    mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
+    mat4.rotate(mvMatrix, degToRad(earthAngle), [0, 1, 0]);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, earthColorMapTexture);
