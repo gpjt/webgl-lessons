@@ -5,6 +5,7 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -336,6 +337,7 @@
 
 
   function tick() {
+    requestAnimFrame(tick);
     handleKeys();
     drawScene();
     animate();
@@ -360,7 +362,7 @@
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
-    setInterval(tick, 15);
+    tick();
   }
 
 

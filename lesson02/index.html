@@ -5,6 +5,7 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -176,6 +177,8 @@
 
 
   function drawScene() {
+    requestAnimFrame(drawScene);
+    
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -219,7 +222,7 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    setInterval(drawScene, 15);
+    drawScene();
   }
 
 
