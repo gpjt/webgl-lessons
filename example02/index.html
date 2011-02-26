@@ -4,8 +4,8 @@
 <title>Learning WebGL &mdash; Mandelbrot shader on a spinning cube</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="sylvester.js"></script>
-<script type="text/javascript" src="glUtils.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
 
 
 <script id="color-shader-fs" type="x-shader/x-fragment">
@@ -219,16 +219,14 @@
   }
 
 
-  var mvMatrix;
+  var mvMatrix = mat4.create();
   var mvMatrixStack = [];
+  var pMatrix = mat4.create();
 
-  function mvPushMatrix(m) {
-    if (m) {
-      mvMatrixStack.push(m.dup());
-      mvMatrix = m.dup();
-    } else {
-      mvMatrixStack.push(mvMatrix.dup());
-    }
+  function mvPushMatrix() {
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
+    mvMatrixStack.push(copy);
   }
 
   function mvPopMatrix() {
@@ -236,38 +234,17 @@
       throw "Invalid popMatrix!";
     }
     mvMatrix = mvMatrixStack.pop();
-    return mvMatrix;
-  }
-
-  function loadIdentity() {
-    mvMatrix = Matrix.I(4);
-  }
-
-
-  function multMatrix(m) {
-    mvMatrix = mvMatrix.x(m);
-  }
-
-  function mvTranslate(v) {
-    var m = Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-  function mvRotate(ang, v) {
-    var arad = ang * Math.PI / 180.0;
-    var m = Matrix.Rotation(arad, $V([v[0], v[1], v[2]])).ensure4x4();
-    multMatrix(m);
-  }
-
-  var pMatrix;
-  function perspective(fovy, aspect, znear, zfar) {
-    pMatrix = makePerspective(fovy, aspect, znear, zfar);
   }
 
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(currentProgram.pMatrixUniform, false, new Float32Array(pMatrix.flatten()));
-    gl.uniformMatrix4fv(currentProgram.mvMatrixUniform, false, new Float32Array(mvMatrix.flatten()));
+    gl.uniformMatrix4fv(currentProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(currentProgram.mvMatrixUniform, false, mvMatrix);
+  }
+
+
+  function degToRad(degrees) {
+    return degrees * Math.PI / 180;
   }
 
 
@@ -339,13 +316,14 @@
 
   MandelbrotCube.prototype.draw = function() {
     setCurrentProgram(mandelbrotProgram);
-    loadIdentity();
 
-    mvTranslate([this.xPos, this.yPos, this.zPos])
+    mat4.identity(mvMatrix);
 
-    mvRotate(this.xRot, [1, 0, 0]);
-    mvRotate(this.yRot, [0, 1, 0]);
-    mvRotate(this.zRot, [0, 0, 1]);
+    mat4.translate(mvMatrix, [this.xPos, this.yPos, this.zPos]);
+
+    mat4.rotate(mvMatrix, degToRad(this.xRot), [1, 0, 0]);
+    mat4.rotate(mvMatrix, degToRad(this.yRot), [0, 1, 0]);
+    mat4.rotate(mvMatrix, degToRad(this.zRot), [0, 0, 1]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     gl.vertexAttribPointer(mandelbrotProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -516,14 +494,14 @@
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     for (var i in cubes) {
       cubes[i].draw();
     }
 
     setCurrentProgram(colorProgram);
-    loadIdentity();
+    mat4.identity(mvMatrix);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, boundingBoxVertexPositionBuffer);
     gl.vertexAttribPointer(colorProgram.vertexPositionAttribute, boundingBoxVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -551,6 +529,7 @@
 
 
   function tick() {
+    requestAnimFrame(tick);
     drawScene();
     animate();
   }
@@ -579,7 +558,7 @@
       );
     }
 
-    setInterval(tick, 15);
+    tick();
   }
 
 
