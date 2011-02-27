@@ -4,7 +4,7 @@
 <title>Learning WebGL &mdash; lesson 12</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="glMatrix-0.9.4.min.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -30,7 +30,7 @@
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
-  uniform mat4 uNMatrix;
+  uniform mat3 uNMatrix;
 
   uniform vec3 uAmbientColor;
 
@@ -52,8 +52,8 @@
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 
-      vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
-      float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);
+      vec3 transformedNormal = uNMatrix * aVertexNormal;
+      float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
   }
@@ -200,10 +200,10 @@
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-    var normalMatrix = mat4.create();
-    mat4.inverse(mvMatrix, normalMatrix);
-    mat4.transpose(normalMatrix);
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+    var normalMatrix = mat3.create();
+    mat4.toInverseMat3(mvMatrix, normalMatrix);
+    mat3.transpose(normalMatrix);
+    gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
   }
 
 
