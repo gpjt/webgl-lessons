@@ -37,7 +37,7 @@
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
-  uniform mat4 uNMatrix;
+  uniform mat3 uNMatrix;
 
   uniform vec3 uAmbientColor;
 
@@ -59,8 +59,8 @@
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 
-      vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
-      float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);
+      vec3 transformedNormal = uNMatrix * aVertexNormal;
+      float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
   }
@@ -73,7 +73,7 @@
   #endif
 
   varying vec2 vTextureCoord;
-  varying vec4 vTransformedNormal;
+  varying vec3 vTransformedNormal;
   varying vec4 vPosition;
 
   uniform bool uUseLighting;
@@ -94,7 +94,7 @@
     } else {
       vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
 
-      float directionalLightWeighting = max(dot(normalize(vTransformedNormal.xyz), lightDirection), 0.0);
+      float directionalLightWeighting = max(dot(normalize(vTransformedNormal), lightDirection), 0.0);
       lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
     }
 
@@ -115,10 +115,10 @@
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
-  uniform mat4 uNMatrix;
+  uniform mat3 uNMatrix;
 
   varying vec2 vTextureCoord;
-  varying vec4 vTransformedNormal;
+  varying vec3 vTransformedNormal;
   varying vec4 vPosition;
 
 
@@ -126,7 +126,7 @@
     vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
     gl_Position = uPMatrix * vPosition;
     vTextureCoord = aTextureCoord;
-    vTransformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);
+    vTransformedNormal = uNMatrix * aVertexNormal;
   }
 </script>
 
@@ -281,10 +281,10 @@
     gl.uniformMatrix4fv(currentProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(currentProgram.mvMatrixUniform, false, mvMatrix);
 
-    var normalMatrix = mat4.create();
-    mat4.inverse(mvMatrix, normalMatrix);
-    mat4.transpose(normalMatrix);
-    gl.uniformMatrix4fv(currentProgram.nMatrixUniform, false, normalMatrix);
+    var normalMatrix = mat3.create();
+    mat4.toInverseMat3(mvMatrix, normalMatrix);
+    mat3.transpose(normalMatrix);
+    gl.uniformMatrix3fv(currentProgram.nMatrixUniform, false, normalMatrix);
   }
 
 
