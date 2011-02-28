@@ -243,7 +243,7 @@
 
     cubeVertexColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-    var colors = [
+    colors = [
       [1.0, 0.0, 0.0, 1.0],     // Front face
       [1.0, 1.0, 0.0, 1.0],     // Back face
       [0.0, 1.0, 0.0, 1.0],     // Top face
@@ -251,7 +251,7 @@
       [1.0, 0.0, 1.0, 1.0],     // Right face
       [0.0, 0.0, 1.0, 1.0],     // Left face
     ];
-    var unpackedColors = []
+    var unpackedColors = [];
     for (var i in colors) {
       var color = colors[i];
       for (var j=0; j < 4; j++) {
