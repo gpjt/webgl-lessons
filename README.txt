@@ -1,24 +1,35 @@
-A series of simple lessons in WebGL, plus some related examples.
+Some lessons in WebGL
+---------------------
 
-The folders named lesson01, lesson02, and so on are a sequential tutorial
-and are best understood using the explanatory text at:
+This repository contains a series of simple lessons in WebGL, plus some
+related examples.
 
-    <http://learningwebgl.com/>
+The folders named lesson01, lesson02, and so on are a sequential tutorial and
+are best understood using the explanatory text at:
 
-The form of the lessons is *very* loosely based on NeHe Productions'
+    <http://learningwebgl.com/lessons/>
+
+The form of the first ten lessons is *very* loosely based on NeHe Productions'
 well-known OpenGL tutorial, which can be found here:
 
     <http://nehe.gamedev.net/>
 
+The lessons from 11 onwards are not related to the NeHe ones.
 
-The folders named example01 etc are example code for interesting
-stuff outside the scope of the tutorial, and have their own README.txt
-files with details.
+The folders named example01 etc are example code for interesting stuff outside
+the scope of the tutorial, and have their own README.txt files with details.
 
-When experimenting with the lessons in Chrome you will need to run them from an 
+
+Notes for working in Chrome
+---------------------------
+
+When experimenting with the lessons in Chrome you will need to run them from a
 local web server to avoid security issues loading from a different origin.
 
-Setup an Apache localhost for webgl-lessons on Mac OS X
+Here are instructions on how to do that using Apache under Mac OS X; GNU/Linux
+will be similar.  If you're on Windows, check out Xampp at
+<http://www.apachefriends.org/en/xampp.html>
+
 
 1) Add an entry for webgl-lessons.local in /etc/hosts.
 
@@ -46,7 +57,7 @@ This will need to be done as the root user using your preferred editor:
 
     $ sudo <editor> /private/etc/apache2/extra/httpd-vhosts.conf
 
-Add the following vhost configuration replacing <path-to-webgl-lessons> with 
+Add the following vhost configuration replacing <path-to-webgl-lessons> with
 the actual path on your filesystem:
 
     <VirtualHost webgl-lessons.local:80>
@@ -61,7 +72,8 @@ the actual path on your filesystem:
       </Directory>
     </VirtualHost>
 
-After making the change in the Apache vhost configuration first confirm the the syntax for the Apache configuration is still correct:
+After making the change in the Apache vhost configuration first confirm the
+syntax for the Apache configuration is still correct:
 
     $ apachectl configtest
     Syntax OK
@@ -70,4 +82,5 @@ If the syntax is OK then restart Apache:
 
     $ sudo apachectl restart
 
-Now you can open the webgl-lessons in any local browser at this url: http://webgl-lessons.local/
+Now you can open the webgl-lessons in any local browser at this url:
+<http://webgl-lessons.local/>
