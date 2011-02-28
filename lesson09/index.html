@@ -295,8 +295,8 @@
   };
 
 
+  var effectiveFPMS = 60 / 1000;
   Star.prototype.animate = function(elapsedTime) {
-    var effectiveFPMS = 60 / 1000;
     this.angle += this.rotationSpeed * effectiveFPMS * elapsedTime;
 
     // Decrease the distance, resetting the star to the outside of
