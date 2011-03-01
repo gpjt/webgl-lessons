@@ -36,7 +36,7 @@
             gl = canvas.getContext("experimental-webgl");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
-        } catch(e) {
+        } catch (e) {
         }
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
@@ -175,11 +175,7 @@
         initBuffers();
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-        gl.clearDepth(1.0);
-
         gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
 
         drawScene();
     }
