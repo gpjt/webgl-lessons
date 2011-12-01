@@ -7,9 +7,7 @@
 <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    #ifdef GL_ES
-    precision highp float;
-    #endif
+    precision mediump float;
 
     void main(void) {
         gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);

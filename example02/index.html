@@ -9,9 +9,7 @@
 
 
 <script id="color-shader-fs" type="x-shader/x-fragment">
-  #ifdef GL_ES
-  precision highp float;
-  #endif
+  precision mediump float;
 
   varying vec4 vColor;
 
@@ -40,9 +38,7 @@
 
 
 <script id="mandelbrot-shader-fs" type="x-shader/x-fragment">
-  #ifdef GL_ES
-  precision highp float;
-  #endif
+  precision mediump float;
 
   varying vec2 vPlotPosition;
   varying vec4 vColor;
