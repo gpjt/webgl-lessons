@@ -1,0 +1,8 @@
+    <li>From Murphy, a <a href="http://murfy.de/webgl/sphere.html">spinning 3D chessboard sphere</a> (doesn't work in Chromium right now, unfortunately).</li>
+    <li>From Pl4n3, a <a href="http://www.plsw.net/gnomwgl.htm">friendly alien</a>...
+    <li>...or the beginnings of a game with what look like <a href="http://www.plsw.net/craft.htm">considerably less-friendly aliens</a></li>
+    <li>Copperlicht is a high-level library built on top of WebGL, and this is their <a href="http://www.ambiera.at/copperlicht/demos/demo_quakelevel_external.html">port of a Quake level</a>
+    <li>From Jacob Seidelin, two amazing graphics demos <a href="http://www.nihilogic.dk/labs/webgl_musical_solar_system/">a musical Solar System</a> (warning: techno soundtrack) and <a href="http://www.nihilogic.dk/labs/worlds_of_webgl/">Worlds of WebGL</a> (the latter doesn't work in Minefield right now, unfortunately).
+    <li>Some WebGL ports of stuff from the demo scene &mdash; people who delight in creating tiny programs that do amazing graphics: <a href="http://wakaba.c3.cx/w/puls.html">Dag Ågren's port of Rrrola's Puls demo, <a href="http://cs.helsinki.fi/u/ilmarihe/metatunnel.html">Metatunnel</a>, <a href="http://wakaba.c3.cx/w/escher_droste.html">a demo of the Escher-Droste effect</a>, and <a href="http://wakaba.c3.cx/w/four_dollar_plastic_laminator">Four dollar Plastic Laminator</a> (the last takes a few seconds to get started &mdash; it's worth waiting for it!).</li>
+    <li>Finally, the first WebGL demo I every saw (way back in September 2009): Vladimir Vukicevic's <a href="http://people.mozilla.com/~vladimir/webgl/spore/sporeview.html">Spore Creature View</a> (spin using the mouse)</li>
+
