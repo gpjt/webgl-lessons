@@ -1,3 +1,10 @@
+------------------------------------------------------------------
+The official maintained repository for this project is now
+https://github.com/tparisi/webgl-lessons -- please fork from and
+and send pull requests to there rather than here.
+------------------------------------------------------------------
+
+
 Some lessons in WebGL
 ---------------------
 
