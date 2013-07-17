@@ -57,6 +57,8 @@
 
 <script type="text/javascript">
 
+
+
     var gl;
 
     function initGL(canvas) {
@@ -210,14 +212,27 @@
     var moonRotationMatrix = mat4.create();
     mat4.identity(moonRotationMatrix);
 
+
+
     function handleMouseDown(event) {
         mouseDown = true;
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
     }
 
+    function handleTouchStart(evt) {
+      evt.preventDefault();
+      var touches = evt.changedTouches;
+        
+      if (touches.length > 0) {
+        lastMouseX = touches[0].pageX, 
+        lastMouseY = touches[0].pageY;
+      }
+    }
 
-    function handleMouseUp(event) {
+
+
+    function handleMouseUpOrTouchEnd(event) {
         mouseDown = false;
     }
 
@@ -229,6 +244,11 @@
         var newX = event.clientX;
         var newY = event.clientY;
 
+        processDrag(newX, newY);
+
+    }
+
+    function processDrag(newX, newY) {
         var deltaX = newX - lastMouseX
         var newRotationMatrix = mat4.create();
         mat4.identity(newRotationMatrix);
@@ -243,7 +263,17 @@
         lastMouseY = newY;
     }
 
+    function handleTouchMove(evt) {
+      evt.preventDefault();
+      var touches = evt.changedTouches;
 
+      if (touches.length > 0) {
+        var newX = touches[0].pageX;
+        var newY = touches[0].pageY;
+        processDrag(newX, newY);
+      }
+      
+    }
 
     var moonVertexPositionBuffer;
     var moonVertexNormalBuffer;
@@ -390,6 +420,7 @@
         drawScene();
     }
 
+    var mydiv;
 
     function webGLStart() {
         var canvas = document.getElementById("lesson11-canvas");
@@ -402,11 +433,19 @@
         gl.enable(gl.DEPTH_TEST);
 
         canvas.onmousedown = handleMouseDown;
-        document.onmouseup = handleMouseUp;
+        document.onmouseup = handleMouseUpOrTouchEnd;
         document.onmousemove = handleMouseMove;
+
+        el = document.getElementById('mydiv');
+        el.addEventListener("touchstart", handleTouchStart, false);
+        el.addEventListener("touchend", handleMouseUpOrTouchEnd, false);
+        el.addEventListener("touchcancel", handleMouseUpOrTouchEnd, false);
+        el.addEventListener("touchleave", handleMouseUpOrTouchEnd, false);
+        el.addEventListener("touchmove", handleTouchMove, false);
 
         tick();
     }
+
 
 </script>
 
@@ -417,7 +456,9 @@
 <body onload="webGLStart();">
     <a href="http://learningwebgl.com/blog/?p=1253">&lt;&lt; Back to Lesson 11</a><br />
 
-    <canvas id="lesson11-canvas" style="border: none;" width="500" height="500"></canvas>
+    <div id="mydiv">
+      <canvas id="lesson11-canvas" style="border: none;" width="500" height="500"></canvas>
+    </div>
     <br/>
 
     <input type="checkbox" id="lighting" checked /> Use lighting<br/>
