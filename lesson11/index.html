@@ -57,6 +57,8 @@
 
 <script type="text/javascript">
 
+
+
     var gl;
 
     function initGL(canvas) {
@@ -203,32 +205,57 @@
     }
 
 
-    var mouseDown = false;
+    var mouseDownOrTouchActive = false;
     var lastMouseX = null;
     var lastMouseY = null;
+    var touchId = null;
 
     var moonRotationMatrix = mat4.create();
     mat4.identity(moonRotationMatrix);
 
     function handleMouseDown(event) {
-        mouseDown = true;
+        mouseDownOrTouchActive = true;
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
     }
 
-
-    function handleMouseUp(event) {
-        mouseDown = false;
+    function handleTouchStart(evt) {
+      evt.preventDefault();
+      var touches = evt.targetTouches;
+        
+      if (touches.length == 1 && !mouseDownOrTouchActive ) {
+        touchId = touches[0].identifier; 
+        lastMouseX = touches[0].pageX, 
+        lastMouseY = touches[0].pageY;
+      }
     }
 
+    function handleMouseUpOrTouchEnd(event) {
+        mouseDownOrTouchActive = false;
+    }
 
     function handleMouseMove(event) {
-        if (!mouseDown) {
+        if (!mouseDownOrTouchActive) {
             return;
         }
         var newX = event.clientX;
         var newY = event.clientY;
 
+        processDrag(newX, newY);
+    }
+
+    function handleTouchMove(evt) {
+      evt.preventDefault();
+      var touches = evt.targetTouches;
+
+      if (touches.length == 1 && touchId == touches[0].identifier) {
+        var newX = touches[0].pageX;
+        var newY = touches[0].pageY;
+        processDrag(newX, newY);
+      }
+    }
+
+    function processDrag(newX, newY) {
         var deltaX = newX - lastMouseX
         var newRotationMatrix = mat4.create();
         mat4.identity(newRotationMatrix);
@@ -242,8 +269,6 @@
         lastMouseX = newX
         lastMouseY = newY;
     }
-
-
 
     var moonVertexPositionBuffer;
     var moonVertexNormalBuffer;
@@ -402,11 +427,18 @@
         gl.enable(gl.DEPTH_TEST);
 
         canvas.onmousedown = handleMouseDown;
-        document.onmouseup = handleMouseUp;
+        document.onmouseup = handleMouseUpOrTouchEnd;
         document.onmousemove = handleMouseMove;
+
+        canvas.addEventListener("touchstart", handleTouchStart, false);
+        canvas.addEventListener("touchend", handleMouseUpOrTouchEnd, false);
+        canvas.addEventListener("touchcancel", handleMouseUpOrTouchEnd, false);
+        canvas.addEventListener("touchleave", handleMouseUpOrTouchEnd, false);
+        canvas.addEventListener("touchmove", handleTouchMove, false);
 
         tick();
     }
+
 
 </script>
 
@@ -416,6 +448,7 @@
 
 <body onload="webGLStart();">
     <a href="http://learningwebgl.com/blog/?p=1253">&lt;&lt; Back to Lesson 11</a><br />
+
 
     <canvas id="lesson11-canvas" style="border: none;" width="500" height="500"></canvas>
     <br/>
